@@ -47,6 +47,43 @@ type Token struct {
 	Value string
 }
 
+func TokenTypeToString(tokenType TokenType) string {
+	tokenTypeToString := map[TokenType]string{
+		TOKEN_EOF:               "eof",
+		TOKEN_ILLEGAL:           "illegal",
+		TOKEN_LET:               "let",
+		TOKEN_FUNCTION:          "function",
+		TOKEN_RETURN:            "return",
+		TOKEN_IF:                "if",
+		TOKEN_ELSE:              "else",
+		TOKEN_IDENTIFIER:        "identifier",
+		TOKEN_INTEGER:           "integer",
+		TOKEN_STRING:            "string",
+		TOKEN_ASSIGN:            "assign",
+		TOKEN_PLUS:              "plus",
+		TOKEN_MINUS:             "minus",
+		TOKEN_ASTERISK:          "asterisk",
+		TOKEN_SLASH:             "slash",
+		TOKEN_BANG:              "bang",
+		TOKEN_EQUALS:            "equals",
+		TOKEN_NOT_EQUALS:        "not equals",
+		TOKEN_GREATER:           "greater",
+		TOKEN_GREATER_OR_EQUALS: "greater or equals",
+		TOKEN_LESS:              "less",
+		TOKEN_LESS_OR_EQUALS:    "less or equals",
+		TOKEN_OPEN_PAREN:        "open paren",
+		TOKEN_CLOSE_PAREN:       "close paren",
+		TOKEN_OPEN_BRACE:        "open brace",
+		TOKEN_CLOSE_BRACE:       "close brace",
+		TOKEN_OPEN_BRACKET:      "open bracket",
+		TOKEN_CLOSE_BRACKET:     "close bracket",
+		TOKEN_COMMA:             "comma",
+		TOKEN_COLON:             "colon",
+		TOKEN_SEMICOLON:         "semicolon",
+	}
+	return tokenTypeToString[tokenType]
+}
+
 func NewToken(tokenType TokenType, value string) *Token {
 	return &Token{
 		Type:  tokenType,
