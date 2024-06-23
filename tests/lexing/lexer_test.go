@@ -152,13 +152,13 @@ e[4] == 5;
 		token := lexer.Next()
 
 		if token.Type != expectation.tokenType ||
-			token.Value != expectation.value {
+			token.Literal != expectation.value {
 			t.Fatalf(
 				"[%d] Expected token %q of type %d, found token %q of type %d.",
 				index,
 				expectation.value,
 				expectation.tokenType,
-				token.Value,
+				token.Literal,
 				token.Type,
 			)
 		}

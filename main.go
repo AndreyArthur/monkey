@@ -39,7 +39,7 @@ func main() {
 			fmt.Printf(
 				"%s: %q\n",
 				lexing.TokenTypeToString(token.Type),
-				token.Value,
+				token.Literal,
 			)
 		}
 	}

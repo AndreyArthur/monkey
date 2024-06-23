@@ -43,8 +43,8 @@ const (
 type TokenType int
 
 type Token struct {
-	Type  TokenType
-	Value string
+	Type    TokenType
+	Literal string
 }
 
 func TokenTypeToString(tokenType TokenType) string {
@@ -84,9 +84,9 @@ func TokenTypeToString(tokenType TokenType) string {
 	return tokenTypeToString[tokenType]
 }
 
-func NewToken(tokenType TokenType, value string) *Token {
+func NewToken(tokenType TokenType, literal string) *Token {
 	return &Token{
-		Type:  tokenType,
-		Value: value,
+		Type:    tokenType,
+		Literal: literal,
 	}
 }
