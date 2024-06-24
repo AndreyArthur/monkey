@@ -12,6 +12,7 @@ const (
 	AST_BOOLEAN_LITERAL
 	AST_PREFIX_EXPRESSION
 	AST_INFIX_EXPRESSION
+	AST_IDENTIFIER
 )
 
 type AstType int
@@ -122,4 +123,20 @@ func (infixExpression *AstInfixExpression) String() string {
 		" " +
 		infixExpression.Right.String() +
 		")"
+}
+
+type AstIdentifier struct {
+	Token *lexing.Token
+	Name  string
+}
+
+func (identifier *AstIdentifier) expression() {}
+func (identifier *AstIdentifier) Type() AstType {
+	return AST_IDENTIFIER
+}
+func (identifier *AstIdentifier) TokenLiteral() string {
+	return identifier.Token.Literal
+}
+func (identifier *AstIdentifier) String() string {
+	return identifier.Name
 }

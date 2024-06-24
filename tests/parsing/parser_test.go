@@ -19,6 +19,7 @@ func TestParseExpressionStatement(t *testing.T) {
 		{"2 < 3 == !false", "((2 < 3) == (!false));"},
 		{"(2 + 2) * 6", "((2 + 2) * 6);"},
 		{"2 - 2 + 2", "((2 - 2) + 2);"},
+		{"2 - -my_variable + 2", "((2 - (-my_variable)) + 2);"},
 	}
 
 	for _, expectation := range expectations {

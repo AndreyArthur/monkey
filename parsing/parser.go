@@ -112,6 +112,15 @@ func (parser *Parser) parseEnforcedPrecedenceExpression() AstExpression {
 	return expression
 }
 
+func (parser *Parser) parseIdentifier() *AstIdentifier {
+	identifier := &AstIdentifier{
+		Token: parser.current,
+		Name:  parser.current.Literal,
+	}
+	parser.advance()
+	return identifier
+}
+
 func (parser *Parser) parseExpression(precedence int) AstExpression {
 	var left AstExpression
 
@@ -120,10 +129,12 @@ func (parser *Parser) parseExpression(precedence int) AstExpression {
 		left = parser.parseIntegerLiteral()
 	case lexing.TOKEN_TRUE, lexing.TOKEN_FALSE:
 		left = parser.parseBooleanLiteral()
-	case lexing.TOKEN_BANG, lexing.TOKEN_MINUS:
-		left = parser.parsePrefixExpression()
+	case lexing.TOKEN_IDENTIFIER:
+		left = parser.parseIdentifier()
 	case lexing.TOKEN_OPEN_PAREN:
 		left = parser.parseEnforcedPrecedenceExpression()
+	case lexing.TOKEN_BANG, lexing.TOKEN_MINUS:
+		left = parser.parsePrefixExpression()
 	}
 
 	for precedence < getPrecedence(parser.current.Type) {
