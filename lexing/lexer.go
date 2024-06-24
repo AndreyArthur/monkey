@@ -116,6 +116,10 @@ func (lexer *Lexer) collectIdentifierOrKeyword() *Token {
 		tokenType = TOKEN_IF
 	case "else":
 		tokenType = TOKEN_ELSE
+	case "true":
+		tokenType = TOKEN_TRUE
+	case "false":
+		tokenType = TOKEN_FALSE
 	default:
 		tokenType = TOKEN_IDENTIFIER
 	}

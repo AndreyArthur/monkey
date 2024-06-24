@@ -10,6 +10,8 @@ const (
 	TOKEN_RETURN
 	TOKEN_IF
 	TOKEN_ELSE
+	TOKEN_TRUE
+	TOKEN_FALSE
 
 	TOKEN_IDENTIFIER
 
@@ -56,6 +58,8 @@ func TokenTypeToString(tokenType TokenType) string {
 		TOKEN_RETURN:            "return",
 		TOKEN_IF:                "if",
 		TOKEN_ELSE:              "else",
+		TOKEN_TRUE:              "true",
+		TOKEN_FALSE:             "false",
 		TOKEN_IDENTIFIER:        "identifier",
 		TOKEN_INTEGER:           "integer",
 		TOKEN_STRING:            "string",
