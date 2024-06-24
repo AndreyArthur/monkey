@@ -64,6 +64,13 @@ func (parser *Parser) advance() {
 	parser.current = parser.tokens[parser.position]
 }
 
+func (parser *Parser) peek() *lexing.Token {
+	if parser.position+1 >= len(parser.tokens) {
+		return nil
+	}
+	return parser.tokens[parser.position+1]
+}
+
 func (parser *Parser) parseIntegerLiteral() *AstIntegerLiteral {
 	value, _ := strconv.ParseInt(parser.current.Literal, 10, 64)
 	integerLiteral := &AstIntegerLiteral{
@@ -121,6 +128,25 @@ func (parser *Parser) parseIdentifier() *AstIdentifier {
 	return identifier
 }
 
+func (parser *Parser) parseFunctionCall() *AstFunctionCall {
+	functionCall := &AstFunctionCall{
+		Token:     parser.current,
+		Arguments: []AstExpression{},
+	}
+	functionCall.Identifier = parser.parseIdentifier()
+	parser.advance()
+	for parser.current.Type != lexing.TOKEN_CLOSE_PAREN {
+		expression := parser.parseExpression(PRECEDENCE_LOWEST)
+		functionCall.Arguments = append(functionCall.Arguments, expression)
+		// expect
+		if parser.current.Type == lexing.TOKEN_COMMA {
+			parser.advance()
+		}
+	}
+	parser.advance()
+	return functionCall
+}
+
 func (parser *Parser) parseExpression(precedence int) AstExpression {
 	var left AstExpression
 
@@ -130,7 +156,11 @@ func (parser *Parser) parseExpression(precedence int) AstExpression {
 	case lexing.TOKEN_TRUE, lexing.TOKEN_FALSE:
 		left = parser.parseBooleanLiteral()
 	case lexing.TOKEN_IDENTIFIER:
-		left = parser.parseIdentifier()
+		if parser.peek().Type == lexing.TOKEN_OPEN_PAREN {
+			left = parser.parseFunctionCall()
+		} else {
+			left = parser.parseIdentifier()
+		}
 	case lexing.TOKEN_OPEN_PAREN:
 		left = parser.parseEnforcedPrecedenceExpression()
 	case lexing.TOKEN_BANG, lexing.TOKEN_MINUS:
@@ -145,6 +175,7 @@ func (parser *Parser) parseExpression(precedence int) AstExpression {
 }
 
 func (parser *Parser) parseExpressionStatement() *AstExpressionStatement {
+	// skip a semicolon
 	return &AstExpressionStatement{
 		Token:      parser.current,
 		Expression: parser.parseExpression(PRECEDENCE_LOWEST),

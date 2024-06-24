@@ -20,6 +20,7 @@ func TestParseExpressionStatement(t *testing.T) {
 		{"(2 + 2) * 6", "((2 + 2) * 6);"},
 		{"2 - 2 + 2", "((2 - 2) + 2);"},
 		{"2 - -my_variable + 2", "((2 - (-my_variable)) + 2);"},
+		{"2 + add(1, 2 + 3)", "(2 + add(1, (2 + 3)));"},
 	}
 
 	for _, expectation := range expectations {

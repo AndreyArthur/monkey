@@ -13,6 +13,7 @@ const (
 	AST_PREFIX_EXPRESSION
 	AST_INFIX_EXPRESSION
 	AST_IDENTIFIER
+	AST_FUNCTION_CALL
 )
 
 type AstType int
@@ -139,4 +140,31 @@ func (identifier *AstIdentifier) TokenLiteral() string {
 }
 func (identifier *AstIdentifier) String() string {
 	return identifier.Name
+}
+
+type AstFunctionCall struct {
+	Token      *lexing.Token
+	Identifier *AstIdentifier
+	Arguments  []AstExpression
+}
+
+func (functionCall *AstFunctionCall) expression() {}
+func (functionCall *AstFunctionCall) Type() AstType {
+	return AST_FUNCTION_CALL
+}
+func (functionCall *AstFunctionCall) TokenLiteral() string {
+	return functionCall.Token.Literal
+}
+func (functionCall *AstFunctionCall) String() string {
+	text := functionCall.Identifier.String() + "("
+
+	for index, argument := range functionCall.Arguments {
+		text += argument.String()
+		if index < len(functionCall.Arguments)-1 {
+			text += ", "
+		}
+	}
+	text += ")"
+
+	return text
 }
