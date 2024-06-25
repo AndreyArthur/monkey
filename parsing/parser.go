@@ -1,7 +1,9 @@
 package parsing
 
 import (
+	"fmt"
 	"monkey/lexing"
+	"slices"
 	"strconv"
 )
 
@@ -35,6 +37,7 @@ type Parser struct {
 	tokens   []*lexing.Token
 	position int
 	current  *lexing.Token
+	errors   []string
 }
 
 func NewParser(lexer *lexing.Lexer) *Parser {
@@ -53,6 +56,38 @@ func NewParser(lexer *lexing.Lexer) *Parser {
 		position: 0,
 		current:  tokens[0],
 	}
+}
+
+func (parser *Parser) addError(message string) {
+	parser.errors = append(parser.errors, message)
+	return
+}
+
+func (parser *Parser) expect(tokenTypes ...lexing.TokenType) {
+	if slices.Contains(tokenTypes, parser.current.Type) {
+		return
+	}
+	tokenTypesString := ""
+	for index, tokenType := range tokenTypes {
+		tokenTypesString += lexing.TokenTypeToString(tokenType)
+		if index < len(tokenTypes)-1 {
+			tokenTypesString += ", "
+		}
+	}
+	parser.addError(fmt.Sprintf(
+		"Expected token of type %s. Found token %q of type %s.",
+		tokenTypesString,
+		parser.current.Literal,
+		lexing.TokenTypeToString(parser.current.Type),
+	))
+}
+
+func (parser *Parser) HasErrors() bool {
+	return len(parser.errors) >= 1
+}
+
+func (parser *Parser) GetErrors() []string {
+	return parser.errors
 }
 
 func (parser *Parser) advance() {
@@ -138,12 +173,20 @@ func (parser *Parser) parseFunctionCall() *AstFunctionCall {
 	for parser.current.Type != lexing.TOKEN_CLOSE_PAREN {
 		expression := parser.parseExpression(PRECEDENCE_LOWEST)
 		functionCall.Arguments = append(functionCall.Arguments, expression)
-		// expect
-		if parser.current.Type == lexing.TOKEN_COMMA {
-			parser.advance()
+		if parser.current.Type != lexing.TOKEN_CLOSE_PAREN {
+			parser.expect(lexing.TOKEN_COMMA)
+			if parser.current.Type == lexing.TOKEN_COMMA {
+				parser.advance()
+			} else {
+				parser.advance()
+				break
+			}
 		}
 	}
-	parser.advance()
+	parser.expect(lexing.TOKEN_CLOSE_PAREN)
+	if parser.current.Type == lexing.TOKEN_CLOSE_PAREN {
+		parser.advance()
+	}
 	return functionCall
 }
 
@@ -175,11 +218,13 @@ func (parser *Parser) parseExpression(precedence int) AstExpression {
 }
 
 func (parser *Parser) parseExpressionStatement() *AstExpressionStatement {
-	// skip a semicolon
-	return &AstExpressionStatement{
+	expressionStatement := &AstExpressionStatement{
 		Token:      parser.current,
 		Expression: parser.parseExpression(PRECEDENCE_LOWEST),
 	}
+	parser.expect(lexing.TOKEN_SEMICOLON)
+	parser.advance()
+	return expressionStatement
 }
 
 func (parser *Parser) parseStatement() AstStatement {
