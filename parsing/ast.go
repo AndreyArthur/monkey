@@ -10,6 +10,7 @@ const (
 	AST_COMPOUND
 	AST_EXPRESSION_STATEMENT
 	AST_LET_STATEMENT
+	AST_RETURN_STATEMENT
 	AST_INTEGER_LITERAL
 	AST_BOOLEAN_LITERAL
 	AST_PREFIX_EXPRESSION
@@ -98,6 +99,25 @@ func (letStatement *AstLetStatement) String() string {
 		letStatement.Identifier.String() +
 		" = " +
 		letStatement.Value.String() +
+		";"
+}
+
+type AstReturnStatement struct {
+	Token *lexing.Token
+	Value AstExpression
+}
+
+func (returnStatement *AstReturnStatement) statement() {}
+func (returnStatement *AstReturnStatement) Type() AstType {
+	return AST_RETURN_STATEMENT
+}
+func (returnStatement *AstReturnStatement) TokenLiteral() string {
+	return returnStatement.Token.Literal
+}
+func (returnStatement *AstReturnStatement) String() string {
+	return returnStatement.TokenLiteral() +
+		" " +
+		returnStatement.Value.String() +
 		";"
 }
 

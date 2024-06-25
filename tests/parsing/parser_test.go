@@ -90,6 +90,41 @@ func TestParseLetStatement(t *testing.T) {
 		}
 	}
 }
+
+func TestParseReturnStatement(t *testing.T) {
+	expectations := []struct {
+		input  string
+		output string
+	}{
+		{"return -1;", "return (-1);"},
+		{"return true;", "return true;"},
+		{"return \"Hello, World\";", "return \"Hello, World\";"},
+	}
+
+	for _, expectation := range expectations {
+		lexer := lexing.NewLexer(expectation.input)
+		parser := parsing.NewParser(lexer)
+		ast := parser.Parse()
+
+		if parser.HasErrors() {
+			for _, error := range parser.GetErrors() {
+				t.Log(error)
+			}
+			t.Fail()
+		}
+
+		output := ast.String()
+
+		if output != expectation.output {
+			t.Fatalf(
+				"Expected: %q\nGot: %q",
+				expectation.output,
+				output,
+			)
+		}
+	}
+}
+
 func TestParserErrors(t *testing.T) {
 	expectations := []struct {
 		input string

@@ -406,10 +406,25 @@ func (parser *Parser) parseLetStatement() *AstLetStatement {
 	return letStatement
 }
 
+func (parser *Parser) parseReturnStatement() *AstReturnStatement {
+	returnStatement := &AstReturnStatement{
+		Token: parser.current,
+	}
+	parser.advance()
+
+	returnStatement.Value = parser.parseExpression(PRECEDENCE_LOWEST)
+
+	parser.expect(lexing.TOKEN_SEMICOLON)
+	parser.advance()
+	return returnStatement
+}
+
 func (parser *Parser) parseStatement() AstStatement {
 	switch parser.current.Type {
 	case lexing.TOKEN_LET:
 		return parser.parseLetStatement()
+	case lexing.TOKEN_RETURN:
+		return parser.parseReturnStatement()
 	default:
 		return parser.parseExpressionStatement()
 	}
