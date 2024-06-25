@@ -9,6 +9,7 @@ const (
 	_ = iota
 	AST_COMPOUND
 	AST_EXPRESSION_STATEMENT
+	AST_LET_STATEMENT
 	AST_INTEGER_LITERAL
 	AST_BOOLEAN_LITERAL
 	AST_PREFIX_EXPRESSION
@@ -76,6 +77,28 @@ func (expressionStatement *AstExpressionStatement) TokenLiteral() string {
 }
 func (expressionStatement *AstExpressionStatement) String() string {
 	return expressionStatement.Expression.String() + ";"
+}
+
+type AstLetStatement struct {
+	Token      *lexing.Token
+	Identifier *AstIdentifier
+	Value      AstExpression
+}
+
+func (letStatement *AstLetStatement) statement() {}
+func (letStatement *AstLetStatement) Type() AstType {
+	return AST_LET_STATEMENT
+}
+func (letStatement *AstLetStatement) TokenLiteral() string {
+	return letStatement.Token.Literal
+}
+func (letStatement *AstLetStatement) String() string {
+	return letStatement.TokenLiteral() +
+		" " +
+		letStatement.Identifier.String() +
+		" = " +
+		letStatement.Value.String() +
+		";"
 }
 
 type AstIntegerLiteral struct {

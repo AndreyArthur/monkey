@@ -388,8 +388,28 @@ func (parser *Parser) parseExpressionStatement() *AstExpressionStatement {
 	return expressionStatement
 }
 
+func (parser *Parser) parseLetStatement() *AstLetStatement {
+	letStatement := &AstLetStatement{
+		Token: parser.current,
+	}
+	parser.advance()
+
+	letStatement.Identifier = parser.parseIdentifier()
+
+	parser.expect(lexing.TOKEN_ASSIGN)
+	parser.advance()
+
+	letStatement.Value = parser.parseExpression(PRECEDENCE_LOWEST)
+
+	parser.expect(lexing.TOKEN_SEMICOLON)
+	parser.advance()
+	return letStatement
+}
+
 func (parser *Parser) parseStatement() AstStatement {
 	switch parser.current.Type {
+	case lexing.TOKEN_LET:
+		return parser.parseLetStatement()
 	default:
 		return parser.parseExpressionStatement()
 	}
