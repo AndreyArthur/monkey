@@ -282,6 +282,64 @@ func (parser *Parser) parseHashLiteral() *AstHashLiteral {
 	return hashLiteral
 }
 
+func (parser *Parser) parseCompound() *AstCompound {
+	compound := &AstCompound{
+		Token:      parser.current,
+		Statements: []AstStatement{},
+	}
+
+	for parser.current.Type != lexing.TOKEN_CLOSE_BRACE &&
+		parser.current.Type != lexing.TOKEN_EOF {
+		compound.Statements = append(
+			compound.Statements,
+			parser.parseStatement(),
+		)
+	}
+
+	return compound
+}
+
+func (parser *Parser) parseFunctionDefinition() *AstFunctionDefinition {
+	functionDefinition := &AstFunctionDefinition{
+		Token:      parser.current,
+		Parameters: []*AstIdentifier{},
+	}
+
+	parser.advance()
+	parser.advance()
+
+	for parser.current.Type != lexing.TOKEN_CLOSE_PAREN {
+		parser.expect(lexing.TOKEN_IDENTIFIER)
+		functionDefinition.Parameters = append(
+			functionDefinition.Parameters,
+			parser.parseIdentifier(),
+		)
+
+		if parser.current.Type != lexing.TOKEN_CLOSE_PAREN {
+			parser.expect(lexing.TOKEN_COMMA)
+			if parser.current.Type == lexing.TOKEN_COMMA {
+				parser.advance()
+			} else {
+				parser.advance()
+				break
+			}
+		}
+	}
+
+	parser.expect(lexing.TOKEN_CLOSE_PAREN)
+	parser.advance()
+
+	parser.expect(lexing.TOKEN_OPEN_BRACE)
+	parser.advance()
+
+	functionDefinition.Body = parser.parseCompound()
+
+	parser.expect(lexing.TOKEN_CLOSE_BRACE)
+	parser.advance()
+
+	return functionDefinition
+}
+
 func (parser *Parser) parseExpression(precedence int) AstExpression {
 	var left AstExpression
 
@@ -300,6 +358,8 @@ func (parser *Parser) parseExpression(precedence int) AstExpression {
 		left = parser.parseHashLiteral()
 	case lexing.TOKEN_OPEN_BRACKET:
 		left = parser.parseArrayLiteral()
+	case lexing.TOKEN_FUNCTION:
+		left = parser.parseFunctionDefinition()
 	case lexing.TOKEN_BANG, lexing.TOKEN_MINUS:
 		left = parser.parsePrefixExpression()
 	}

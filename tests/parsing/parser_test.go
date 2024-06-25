@@ -29,6 +29,8 @@ func TestParseExpressionStatement(t *testing.T) {
 		{"[\"name\", 2, true, 5 < 4];", "[\"name\", 2, true, (5 < 4)];"},
 		{"[1, 2, 3][0];", "[1, 2, 3][0];"},
 		{"{\"name\": \"christian\", true: 2 + 2};", "{\"name\": \"christian\", true: (2 + 2)};"},
+		{"fn (a, b) { a + b; a * b; };", "fn (a, b) { (a + b); (a * b); };"},
+		{"fn () {};", "fn () {  };"},
 	}
 
 	for _, expectation := range expectations {
@@ -68,6 +70,7 @@ func TestParserErrors(t *testing.T) {
 		{"[4, 5};", `Expected token of type comma. Found token "}" of type close brace.`},
 		{"{4; 5};", `Expected token of type colon. Found token ";" of type semicolon.`},
 		{"{4: 5];", `Expected token of type comma. Found token "]" of type close bracket.`},
+		{"fn (2) {};", `Expected token of type identifier. Found token "2" of type integer.`},
 	}
 
 	for _, expectation := range expectations {

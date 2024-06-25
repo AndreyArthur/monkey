@@ -7,6 +7,7 @@ import (
 
 const (
 	_ = iota
+	AST_COMPOUND
 	AST_EXPRESSION_STATEMENT
 	AST_INTEGER_LITERAL
 	AST_BOOLEAN_LITERAL
@@ -18,6 +19,7 @@ const (
 	AST_STRING_LITERAL
 	AST_ARRAY_LITERAL
 	AST_HASH_LITERAL
+	AST_FUNCTION_DEFINITION
 )
 
 type AstType int
@@ -36,6 +38,28 @@ type AstStatement interface {
 type AstExpression interface {
 	AstNode
 	expression()
+}
+
+type AstCompound struct {
+	Token      *lexing.Token
+	Statements []AstStatement
+}
+
+func (compound *AstCompound) Type() AstType {
+	return AST_COMPOUND
+}
+func (compound *AstCompound) TokenLiteral() string {
+	return compound.Token.Literal
+}
+func (compound *AstCompound) String() string {
+	text := ""
+	for index, statement := range compound.Statements {
+		text += statement.String()
+		if index < len(compound.Statements)-1 {
+			text += " "
+		}
+	}
+	return text
 }
 
 type AstExpressionStatement struct {
@@ -260,4 +284,32 @@ func (hashLiteral *AstHashLiteral) String() string {
 
 	return text
 
+}
+
+type AstFunctionDefinition struct {
+	Token      *lexing.Token
+	Parameters []*AstIdentifier
+	Body       *AstCompound
+}
+
+func (functionDefinition *AstFunctionDefinition) expression() {}
+func (functionDefinition *AstFunctionDefinition) Type() AstType {
+	return AST_FUNCTION_DEFINITION
+}
+func (functionDefinition *AstFunctionDefinition) TokenLiteral() string {
+	return functionDefinition.Token.Literal
+}
+func (functionDefinition *AstFunctionDefinition) String() string {
+	text := functionDefinition.TokenLiteral() + " ("
+
+	for index, parameter := range functionDefinition.Parameters {
+		text += parameter.String()
+		if index < len(functionDefinition.Parameters)-1 {
+			text += ", "
+		}
+	}
+
+	text += ") { " + functionDefinition.Body.String() + " }"
+
+	return text
 }
