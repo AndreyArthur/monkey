@@ -14,6 +14,7 @@ const (
 	AST_INFIX_EXPRESSION
 	AST_IDENTIFIER
 	AST_FUNCTION_CALL
+	AST_INDEX
 )
 
 type AstType int
@@ -168,3 +169,22 @@ func (functionCall *AstFunctionCall) String() string {
 
 	return text
 }
+
+type AstIndex struct {
+	Token *lexing.Token
+	Left  AstExpression
+	Index AstExpression
+}
+
+func (index *AstIndex) expression() {}
+func (index *AstIndex) Type() AstType {
+	return AST_INDEX
+}
+func (index *AstIndex) TokenLiteral() string {
+	return index.Token.Literal
+}
+func (index *AstIndex) String() string {
+	return index.Left.String() + "[" + index.Index.String() + "]"
+}
+
+//parse string literals
