@@ -15,6 +15,7 @@ const (
 	PRECEDENCE_SUM
 	PRECEDENCE_PRODUCT
 	PRECEDENCE_PREFIX
+	PRECEDENCE_CALL
 )
 
 func getPrecedence(tokenType lexing.TokenType) int {
@@ -29,6 +30,7 @@ func getPrecedence(tokenType lexing.TokenType) int {
 		lexing.TOKEN_MINUS:             PRECEDENCE_SUM,
 		lexing.TOKEN_ASTERISK:          PRECEDENCE_PRODUCT,
 		lexing.TOKEN_SLASH:             PRECEDENCE_PRODUCT,
+		lexing.TOKEN_OPEN_PAREN:        PRECEDENCE_CALL,
 	}
 	return tokenTypeToPrecedence[tokenType]
 }
@@ -163,12 +165,12 @@ func (parser *Parser) parseIdentifier() *AstIdentifier {
 	return identifier
 }
 
-func (parser *Parser) parseFunctionCall() *AstFunctionCall {
+func (parser *Parser) parseFunctionCall(left AstExpression) *AstFunctionCall {
 	functionCall := &AstFunctionCall{
 		Token:     parser.current,
+		Left:      left,
 		Arguments: []AstExpression{},
 	}
-	functionCall.Identifier = parser.parseIdentifier()
 	parser.advance()
 	for parser.current.Type != lexing.TOKEN_CLOSE_PAREN {
 		expression := parser.parseExpression(PRECEDENCE_LOWEST)
@@ -199,11 +201,7 @@ func (parser *Parser) parseExpression(precedence int) AstExpression {
 	case lexing.TOKEN_TRUE, lexing.TOKEN_FALSE:
 		left = parser.parseBooleanLiteral()
 	case lexing.TOKEN_IDENTIFIER:
-		if parser.peek().Type == lexing.TOKEN_OPEN_PAREN {
-			left = parser.parseFunctionCall()
-		} else {
-			left = parser.parseIdentifier()
-		}
+		left = parser.parseIdentifier()
 	case lexing.TOKEN_OPEN_PAREN:
 		left = parser.parseEnforcedPrecedenceExpression()
 	case lexing.TOKEN_BANG, lexing.TOKEN_MINUS:
@@ -211,7 +209,12 @@ func (parser *Parser) parseExpression(precedence int) AstExpression {
 	}
 
 	for precedence < getPrecedence(parser.current.Type) {
-		left = parser.parseInfixExpression(left)
+		switch parser.current.Type {
+		case lexing.TOKEN_OPEN_PAREN:
+			left = parser.parseFunctionCall(left)
+		default:
+			left = parser.parseInfixExpression(left)
+		}
 	}
 
 	return left

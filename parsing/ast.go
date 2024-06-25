@@ -143,9 +143,9 @@ func (identifier *AstIdentifier) String() string {
 }
 
 type AstFunctionCall struct {
-	Token      *lexing.Token
-	Identifier *AstIdentifier
-	Arguments  []AstExpression
+	Token     *lexing.Token
+	Left      AstExpression
+	Arguments []AstExpression
 }
 
 func (functionCall *AstFunctionCall) expression() {}
@@ -156,7 +156,7 @@ func (functionCall *AstFunctionCall) TokenLiteral() string {
 	return functionCall.Token.Literal
 }
 func (functionCall *AstFunctionCall) String() string {
-	text := functionCall.Identifier.String() + "("
+	text := functionCall.Left.String() + "("
 
 	for index, argument := range functionCall.Arguments {
 		text += argument.String()
