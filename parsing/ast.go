@@ -203,3 +203,28 @@ func (stringLiteral *AstStringLiteral) TokenLiteral() string {
 func (stringLiteral *AstStringLiteral) String() string {
 	return "\"" + stringLiteral.Value + "\""
 }
+
+type AstArrayLiteral struct {
+	Token *lexing.Token
+	Items []AstExpression
+}
+
+func (arrayLiteral *AstArrayLiteral) expression() {}
+func (arrayLiteral *AstArrayLiteral) Type() AstType {
+	return AST_FUNCTION_CALL
+}
+func (arrayLiteral *AstArrayLiteral) TokenLiteral() string {
+	return arrayLiteral.Token.Literal
+}
+func (arrayLiteral *AstArrayLiteral) String() string {
+	text := "["
+	for index, argument := range arrayLiteral.Items {
+		text += argument.String()
+		if index < len(arrayLiteral.Items)-1 {
+			text += ", "
+		}
+	}
+	text += "]"
+
+	return text
+}

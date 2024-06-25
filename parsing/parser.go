@@ -215,6 +215,35 @@ func (parser *Parser) parseStringLiteral() *AstStringLiteral {
 	return stringLiteral
 }
 
+func (parser *Parser) parseArrayLiteral() *AstArrayLiteral {
+	arrayLiteral := &AstArrayLiteral{
+		Token: parser.current,
+		Items: []AstExpression{},
+	}
+	parser.advance()
+	for parser.current.Type != lexing.TOKEN_CLOSE_BRACKET {
+		expression := parser.parseExpression(PRECEDENCE_LOWEST)
+		arrayLiteral.Items = append(arrayLiteral.Items, expression)
+
+		if parser.current.Type != lexing.TOKEN_CLOSE_BRACKET {
+			parser.expect(lexing.TOKEN_COMMA)
+			if parser.current.Type == lexing.TOKEN_COMMA {
+				parser.advance()
+			} else {
+				parser.advance()
+				break
+			}
+		}
+	}
+
+	parser.expect(lexing.TOKEN_CLOSE_BRACKET)
+	if parser.current.Type == lexing.TOKEN_CLOSE_BRACKET {
+		parser.advance()
+	}
+
+	return arrayLiteral
+}
+
 func (parser *Parser) parseExpression(precedence int) AstExpression {
 	var left AstExpression
 
@@ -229,6 +258,8 @@ func (parser *Parser) parseExpression(precedence int) AstExpression {
 		left = parser.parseStringLiteral()
 	case lexing.TOKEN_OPEN_PAREN:
 		left = parser.parseEnforcedPrecedenceExpression()
+	case lexing.TOKEN_OPEN_BRACKET:
+		left = parser.parseArrayLiteral()
 	case lexing.TOKEN_BANG, lexing.TOKEN_MINUS:
 		left = parser.parsePrefixExpression()
 	}

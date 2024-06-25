@@ -26,6 +26,8 @@ func TestParseExpressionStatement(t *testing.T) {
 		{"hashmap[!false];", "hashmap[(!false)];"},
 		{"-array[1];", "(-array[1]);"},
 		{"\"Hello, \" + \"World!\";", "(\"Hello, \" + \"World!\");"},
+		{"[\"name\", 2, true, 5 < 4];", "[\"name\", 2, true, (5 < 4)];"},
+		{"[1, 2, 3][0];", "[1, 2, 3][0];"},
 	}
 
 	for _, expectation := range expectations {
@@ -61,6 +63,8 @@ func TestParserErrors(t *testing.T) {
 		{"myfunction(4; 5);", `Expected token of type comma. Found token ";" of type semicolon.`},
 		{"myfunction(4, 5};", `Expected token of type comma. Found token "}" of type close brace.`},
 		{"array[4};", `Expected token of type close bracket. Found token "}" of type close brace.`},
+		{"[4; 5];", `Expected token of type comma. Found token ";" of type semicolon.`},
+		{"[4, 5};", `Expected token of type comma. Found token "}" of type close brace.`},
 	}
 
 	for _, expectation := range expectations {
