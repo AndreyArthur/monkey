@@ -96,7 +96,7 @@ func (parser *Parser) GetErrors() []string {
 
 func (parser *Parser) advance() {
 	if parser.position+1 >= len(parser.tokens) {
-		parser.current = nil
+		parser.current = parser.tokens[len(parser.tokens)-1]
 		return
 	}
 	parser.position += 1
@@ -430,6 +430,10 @@ func (parser *Parser) parseStatement() AstStatement {
 	}
 }
 
-func (parser *Parser) Parse() AstNode {
-	return parser.parseStatement()
+func (parser *Parser) Parse() *AstCompound {
+	compound := parser.parseCompound()
+
+	parser.expect(lexing.TOKEN_EOF)
+
+	return compound
 }

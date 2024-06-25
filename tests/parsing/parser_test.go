@@ -151,7 +151,6 @@ func TestParserErrors(t *testing.T) {
 			if expectation.error != errors[0] {
 				t.Fatalf("Expected: %q\nGot: %q", expectation.error, errors[0])
 			}
-			t.Fail()
 		} else {
 			t.Fatalf("Expected errors.")
 		}
