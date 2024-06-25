@@ -4,13 +4,15 @@ import (
 	"bufio"
 	"fmt"
 	"monkey/lexing"
+	"monkey/parsing"
 	"os"
+	"strings"
 )
 
 const PROMPT = ">> "
 
 func main() {
-	fmt.Println("Monkey language RLPL (Read Lex Print Loop).")
+	fmt.Println("Monkey language RPPL (Read Parse Print Loop).")
 
 	in := os.Stdin
 	out := os.Stdout
@@ -32,15 +34,15 @@ func main() {
 		}
 
 		lexer := lexing.NewLexer(content)
+		parser := parsing.NewParser(lexer)
+		ast := parser.Parse()
 
-		token := &lexing.Token{Type: lexing.TOKEN_ILLEGAL}
-		for token.Type != lexing.TOKEN_EOF {
-			token = lexer.Next()
-			fmt.Printf(
-				"%s: %q\n",
-				lexing.TokenTypeToString(token.Type),
-				token.Literal,
-			)
+		if parser.HasErrors() {
+			for _, error := range parser.GetErrors() {
+				fmt.Println(error)
+			}
+		} else {
+			fmt.Println(ast.String())
 		}
 	}
 
