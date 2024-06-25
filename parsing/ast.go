@@ -16,6 +16,8 @@ const (
 	AST_FUNCTION_CALL
 	AST_INDEX
 	AST_STRING_LITERAL
+	AST_ARRAY_LITERAL
+	AST_HASH_LITERAL
 )
 
 type AstType int
@@ -195,7 +197,7 @@ type AstStringLiteral struct {
 
 func (stringLiteral *AstStringLiteral) expression() {}
 func (stringLiteral *AstStringLiteral) Type() AstType {
-	return AST_INDEX
+	return AST_STRING_LITERAL
 }
 func (stringLiteral *AstStringLiteral) TokenLiteral() string {
 	return stringLiteral.Token.Literal
@@ -211,15 +213,15 @@ type AstArrayLiteral struct {
 
 func (arrayLiteral *AstArrayLiteral) expression() {}
 func (arrayLiteral *AstArrayLiteral) Type() AstType {
-	return AST_FUNCTION_CALL
+	return AST_STRING_LITERAL
 }
 func (arrayLiteral *AstArrayLiteral) TokenLiteral() string {
 	return arrayLiteral.Token.Literal
 }
 func (arrayLiteral *AstArrayLiteral) String() string {
 	text := "["
-	for index, argument := range arrayLiteral.Items {
-		text += argument.String()
+	for index, item := range arrayLiteral.Items {
+		text += item.String()
 		if index < len(arrayLiteral.Items)-1 {
 			text += ", "
 		}
@@ -227,4 +229,35 @@ func (arrayLiteral *AstArrayLiteral) String() string {
 	text += "]"
 
 	return text
+}
+
+type AstHashLiteralPair struct {
+	Key   AstExpression
+	Value AstExpression
+}
+
+type AstHashLiteral struct {
+	Token *lexing.Token
+	Pairs []*AstHashLiteralPair
+}
+
+func (hashLiteral *AstHashLiteral) expression() {}
+func (hashLiteral *AstHashLiteral) Type() AstType {
+	return AST_HASH_LITERAL
+}
+func (hashLiteral *AstHashLiteral) TokenLiteral() string {
+	return hashLiteral.Token.Literal
+}
+func (hashLiteral *AstHashLiteral) String() string {
+	text := "{"
+	for index, pair := range hashLiteral.Pairs {
+		text += pair.Key.String() + ": " + pair.Value.String()
+		if index < len(hashLiteral.Pairs)-1 {
+			text += ", "
+		}
+	}
+	text += "}"
+
+	return text
+
 }

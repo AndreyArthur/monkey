@@ -244,6 +244,44 @@ func (parser *Parser) parseArrayLiteral() *AstArrayLiteral {
 	return arrayLiteral
 }
 
+func (parser *Parser) parseHashLiteral() *AstHashLiteral {
+	hashLiteral := &AstHashLiteral{
+		Token: parser.current,
+		Pairs: []*AstHashLiteralPair{},
+	}
+	parser.advance()
+	for parser.current.Type != lexing.TOKEN_CLOSE_BRACE {
+		key := parser.parseExpression(PRECEDENCE_LOWEST)
+
+		parser.expect(lexing.TOKEN_COLON)
+		parser.advance()
+
+		value := parser.parseExpression(PRECEDENCE_LOWEST)
+
+		hashLiteral.Pairs = append(hashLiteral.Pairs, &AstHashLiteralPair{
+			Key:   key,
+			Value: value,
+		})
+
+		if parser.current.Type != lexing.TOKEN_CLOSE_BRACE {
+			parser.expect(lexing.TOKEN_COMMA)
+			if parser.current.Type == lexing.TOKEN_COMMA {
+				parser.advance()
+			} else {
+				parser.advance()
+				break
+			}
+		}
+	}
+
+	parser.expect(lexing.TOKEN_CLOSE_BRACE)
+	if parser.current.Type == lexing.TOKEN_CLOSE_BRACE {
+		parser.advance()
+	}
+
+	return hashLiteral
+}
+
 func (parser *Parser) parseExpression(precedence int) AstExpression {
 	var left AstExpression
 
@@ -258,6 +296,8 @@ func (parser *Parser) parseExpression(precedence int) AstExpression {
 		left = parser.parseStringLiteral()
 	case lexing.TOKEN_OPEN_PAREN:
 		left = parser.parseEnforcedPrecedenceExpression()
+	case lexing.TOKEN_OPEN_BRACE:
+		left = parser.parseHashLiteral()
 	case lexing.TOKEN_OPEN_BRACKET:
 		left = parser.parseArrayLiteral()
 	case lexing.TOKEN_BANG, lexing.TOKEN_MINUS:
