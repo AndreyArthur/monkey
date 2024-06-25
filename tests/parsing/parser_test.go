@@ -25,6 +25,7 @@ func TestParseExpressionStatement(t *testing.T) {
 		{"hashmap[3 + -2];", "hashmap[(3 + (-2))];"},
 		{"hashmap[!false];", "hashmap[(!false)];"},
 		{"-array[1];", "(-array[1]);"},
+		{"\"Hello, \" + \"World!\";", "(\"Hello, \" + \"World!\");"},
 	}
 
 	for _, expectation := range expectations {

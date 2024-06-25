@@ -206,6 +206,15 @@ func (parser *Parser) parseIndex(left AstExpression) *AstIndex {
 	return index
 }
 
+func (parser *Parser) parseStringLiteral() *AstStringLiteral {
+	stringLiteral := &AstStringLiteral{
+		Token: parser.current,
+		Value: parser.current.Literal,
+	}
+	parser.advance()
+	return stringLiteral
+}
+
 func (parser *Parser) parseExpression(precedence int) AstExpression {
 	var left AstExpression
 
@@ -216,6 +225,8 @@ func (parser *Parser) parseExpression(precedence int) AstExpression {
 		left = parser.parseBooleanLiteral()
 	case lexing.TOKEN_IDENTIFIER:
 		left = parser.parseIdentifier()
+	case lexing.TOKEN_STRING:
+		left = parser.parseStringLiteral()
 	case lexing.TOKEN_OPEN_PAREN:
 		left = parser.parseEnforcedPrecedenceExpression()
 	case lexing.TOKEN_BANG, lexing.TOKEN_MINUS:

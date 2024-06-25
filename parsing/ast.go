@@ -15,6 +15,7 @@ const (
 	AST_IDENTIFIER
 	AST_FUNCTION_CALL
 	AST_INDEX
+	AST_STRING_LITERAL
 )
 
 type AstType int
@@ -187,4 +188,18 @@ func (index *AstIndex) String() string {
 	return index.Left.String() + "[" + index.Index.String() + "]"
 }
 
-//parse string literals
+type AstStringLiteral struct {
+	Token *lexing.Token
+	Value string
+}
+
+func (stringLiteral *AstStringLiteral) expression() {}
+func (stringLiteral *AstStringLiteral) Type() AstType {
+	return AST_INDEX
+}
+func (stringLiteral *AstStringLiteral) TokenLiteral() string {
+	return stringLiteral.Token.Literal
+}
+func (stringLiteral *AstStringLiteral) String() string {
+	return "\"" + stringLiteral.Value + "\""
+}
