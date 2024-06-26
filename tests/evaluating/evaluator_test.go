@@ -20,6 +20,9 @@ func TestEval(t *testing.T) {
 		{"5 / 2;", evaluating.OBJECT_INTEGER, 2},
 		{"1 + 7 * 2;", evaluating.OBJECT_INTEGER, 15},
 		{"let a = 2;", evaluating.OBJECT_NULL, nil},
+		{"return;", evaluating.OBJECT_NULL, nil},
+		{"return; 2;", evaluating.OBJECT_NULL, nil},
+		{"return true; 2;", evaluating.OBJECT_BOOLEAN, true},
 	}
 
 	for _, expectation := range expectations {

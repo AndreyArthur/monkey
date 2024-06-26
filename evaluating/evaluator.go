@@ -66,6 +66,9 @@ func evalCompound(
 	var last Object
 	for _, statement := range compound.Statements {
 		last = Eval(environment, statement)
+		if statement.Type() == parsing.AST_RETURN_STATEMENT {
+			return last
+		}
 	}
 	return last
 }
@@ -188,6 +191,16 @@ func evalLetStatement(
 	return &ObjectNull{}
 }
 
+func evalReturnStatement(
+	environment *Environment,
+	returnStatement *parsing.AstReturnStatement,
+) Object {
+	if returnStatement.Value == nil {
+		return &ObjectNull{}
+	}
+	return Eval(environment, returnStatement.Value)
+}
+
 func Eval(environment *Environment, ast parsing.AstNode) Object {
 	switch ast.Type() {
 	case parsing.AST_COMPOUND:
@@ -201,6 +214,11 @@ func Eval(environment *Environment, ast parsing.AstNode) Object {
 		return evalLetStatement(
 			environment,
 			ast.(*parsing.AstLetStatement),
+		)
+	case parsing.AST_RETURN_STATEMENT:
+		return evalReturnStatement(
+			environment,
+			ast.(*parsing.AstReturnStatement),
 		)
 	case parsing.AST_INFIX_EXPRESSION:
 		return evalInfixExpression(
