@@ -64,7 +64,7 @@ func objectErrorIdentifierNotFound(name string) Object {
 }
 
 func objectErrorNotCallable(expression parsing.AstExpression) Object {
-	return objectError("Expression %q is not a callable.", expression.String)
+	return objectError("Expression %q is not a callable.", expression.String())
 }
 
 func objectErrorUnsupportedIndex(indexType ObjectType) Object {
@@ -78,7 +78,7 @@ func objectErrorUnsupportedIndex(indexType ObjectType) Object {
 }
 
 func objectErrornotIndexable(expression parsing.AstExpression) Object {
-	return objectError("Expression %q is not a indexable.", expression.String)
+	return objectError("Expression %q is not a indexable.", expression.String())
 }
 
 func evalCompound(
@@ -387,6 +387,9 @@ func evalIfElse(
 	condition := Eval(environment, ifElse.Condition)
 	if condition.Truthiness() == true {
 		return Eval(environment, ifElse.Then)
+	}
+	if ifElse.Else == nil {
+		return &ObjectNull{}
 	}
 	return Eval(environment, ifElse.Else)
 }
