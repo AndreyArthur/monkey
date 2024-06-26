@@ -356,6 +356,52 @@ func (parser *Parser) parseFunctionDefinition() *AstFunctionDefinition {
 	return functionDefinition
 }
 
+func (parser *Parser) parseIfElse() *AstIfElse {
+	ifElse := &AstIfElse{
+		Token: parser.current,
+	}
+	parser.advance()
+
+	parser.expect(lexing.TOKEN_OPEN_PAREN)
+	parser.advance()
+
+	ifElse.Condition = parser.parseExpression(PRECEDENCE_LOWEST)
+
+	parser.expect(lexing.TOKEN_CLOSE_PAREN)
+	parser.advance()
+
+	parser.expect(lexing.TOKEN_OPEN_BRACE)
+	parser.advance()
+
+	ifElse.Then = parser.parseCompound()
+
+	parser.expect(lexing.TOKEN_CLOSE_BRACE)
+	parser.advance()
+
+	if parser.current.Type != lexing.TOKEN_ELSE {
+		ifElse.Else = &AstCompound{
+			Token:      ifElse.Token,
+			Statements: []AstStatement{},
+		}
+
+		parser.commitError()
+		return ifElse
+	}
+
+	parser.advance()
+
+	parser.expect(lexing.TOKEN_OPEN_BRACE)
+	parser.advance()
+
+	ifElse.Else = parser.parseCompound()
+
+	parser.expect(lexing.TOKEN_CLOSE_BRACE)
+	parser.advance()
+
+	parser.commitError()
+	return ifElse
+}
+
 func (parser *Parser) parseExpression(precedence int) AstExpression {
 	var left AstExpression
 
@@ -376,6 +422,8 @@ func (parser *Parser) parseExpression(precedence int) AstExpression {
 		left = parser.parseArrayLiteral()
 	case lexing.TOKEN_FUNCTION:
 		left = parser.parseFunctionDefinition()
+	case lexing.TOKEN_IF:
+		left = parser.parseIfElse()
 	case lexing.TOKEN_BANG, lexing.TOKEN_MINUS:
 		left = parser.parsePrefixExpression()
 	}

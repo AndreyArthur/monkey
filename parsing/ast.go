@@ -22,6 +22,7 @@ const (
 	AST_ARRAY_LITERAL
 	AST_HASH_LITERAL
 	AST_FUNCTION_DEFINITION
+	AST_IF_ELSE
 )
 
 type AstType int
@@ -354,5 +355,33 @@ func (functionDefinition *AstFunctionDefinition) String() string {
 
 	text += ") { " + functionDefinition.Body.String() + " }"
 
+	return text
+}
+
+type AstIfElse struct {
+	Token     *lexing.Token
+	Condition AstExpression
+	Then      *AstCompound
+	Else      *AstCompound
+}
+
+func (ifElse *AstIfElse) expression() {}
+func (ifElse *AstIfElse) Type() AstType {
+	return AST_IF_ELSE
+}
+func (ifElse *AstIfElse) TokenLiteral() string {
+	return ifElse.Token.Literal
+}
+func (ifElse *AstIfElse) String() string {
+	text := ifElse.TokenLiteral() +
+		" (" +
+		ifElse.Condition.String() +
+		") { " +
+		ifElse.Then.String() +
+		" }"
+
+	if len(ifElse.Else.Statements) >= 1 {
+		text += " else { " + ifElse.Else.String() + " }"
+	}
 	return text
 }
