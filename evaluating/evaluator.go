@@ -142,9 +142,23 @@ func evalIntegerOperation(left Object, operator string, right Object) Object {
 	}
 }
 
+func evalStringConcatenation(left Object, right Object) Object {
+	leftString := left.(*ObjectString).Value
+	rightString := right.(*ObjectString).Value
+	return &ObjectString{Value: leftString + rightString}
+}
+
 func evalInfixOperation(left Object, operator string, right Object) Object {
 	switch operator {
-	case "+", "-", "*", "/", ">", ">=", "<", "<=":
+	case "+":
+		if left.Type() != right.Type() {
+			return objectErrorInfixTypeMismatch(left.Type(), operator, right.Type())
+		}
+		if left.Type() == OBJECT_STRING {
+			return evalStringConcatenation(left, right)
+		}
+		return evalIntegerOperation(left, operator, right)
+	case "-", "*", "/", ">", ">=", "<", "<=":
 		return evalIntegerOperation(left, operator, right)
 	case "==", "!=":
 		return evalEquality(left, operator, right)
@@ -354,6 +368,10 @@ func Eval(environment *Environment, ast parsing.AstNode) Object {
 			environment,
 			ast.(*parsing.AstArrayLiteral),
 		)
+	case parsing.AST_STRING_LITERAL:
+		return &ObjectString{
+			Value: ast.(*parsing.AstStringLiteral).Value,
+		}
 	default:
 		// the switch will be exaustive so this should never happen
 		return nil

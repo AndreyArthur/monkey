@@ -13,6 +13,7 @@ const (
 	OBJECT_NULL
 	OBJECT_ARRAY
 	OBJECT_FUNCTION
+	OBJECT_STRING
 )
 
 type ObjectType int
@@ -143,5 +144,22 @@ func (array *ObjectArray) Inspect() string {
 	return text
 }
 func (array *ObjectArray) Truthiness() bool {
+	return true
+}
+
+type ObjectString struct {
+	Value string
+}
+
+func (string *ObjectString) Type() ObjectType {
+	return OBJECT_STRING
+}
+func (string *ObjectString) Inspect() string {
+	return fmt.Sprintf("%q", string.Value)
+}
+func (string *ObjectString) Truthiness() bool {
+	if string.Value == "" {
+		return false
+	}
 	return true
 }

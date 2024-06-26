@@ -28,6 +28,7 @@ func TestEvalExpressions(t *testing.T) {
 		{"fn (a, b) { return a + b; }(1, 2);", evaluating.OBJECT_INTEGER, 3},
 		{"fn (a) { return fn (b) { return a + b; }; }(2)(1);", evaluating.OBJECT_INTEGER, 3},
 		{"[!2, 4 + 8, true, false];", evaluating.OBJECT_ARRAY, "[false, 12, true, false]"},
+		{"\"Hello, \" + \"World!\";", evaluating.OBJECT_STRING, "\"Hello, World!\""},
 	}
 
 	for _, expectation := range expectations {
