@@ -77,6 +77,10 @@ func objectErrorUnsupportedIndex(indexType ObjectType) Object {
 	)
 }
 
+func objectErrornotIndexable(expression parsing.AstExpression) Object {
+	return objectError("Expression %q is not a indexable.", expression.String)
+}
+
 func evalCompound(
 	environment *Environment,
 	compound *parsing.AstCompound,
@@ -342,6 +346,40 @@ func evalHashLiteral(
 	return object
 }
 
+func evalArrayIndex(array *ObjectArray, indexObject Object) Object {
+	index := indexObject.(*ObjectInteger).Value
+	if index < 0 || index >= int64(len(array.Items)) {
+		return &ObjectNull{}
+	}
+	return array.Items[index]
+}
+
+func evalHashIndex(hash *ObjectHash, key Object) Object {
+	return hash.Get(key)
+}
+
+func evalIndex(
+	environment *Environment,
+	index *parsing.AstIndex,
+) Object {
+	left := Eval(environment, index.Left)
+	key := Eval(environment, index.Index)
+	if key.Type() != OBJECT_STRING &&
+		key.Type() != OBJECT_INTEGER &&
+		key.Type() != OBJECT_BOOLEAN {
+		return objectErrorUnsupportedIndex(key.Type())
+	}
+
+	switch left.Type() {
+	case OBJECT_ARRAY:
+		return evalArrayIndex(left.(*ObjectArray), key)
+	case OBJECT_HASH:
+		return evalHashIndex(left.(*ObjectHash), key)
+	default:
+		return objectErrornotIndexable(index.Left)
+	}
+}
+
 func Eval(environment *Environment, ast parsing.AstNode) Object {
 	switch ast.Type() {
 	case parsing.AST_COMPOUND:
@@ -407,6 +445,11 @@ func Eval(environment *Environment, ast parsing.AstNode) Object {
 		return evalHashLiteral(
 			environment,
 			ast.(*parsing.AstHashLiteral),
+		)
+	case parsing.AST_INDEX:
+		return evalIndex(
+			environment,
+			ast.(*parsing.AstIndex),
 		)
 	default:
 		// the switch will be exaustive so this should never happen

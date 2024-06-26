@@ -187,3 +187,27 @@ func (hash *ObjectHash) Inspect() string {
 func (hash *ObjectHash) Truthiness() bool {
 	return true
 }
+func (hash *ObjectHash) Get(key Object) Object {
+	for index, hashKey := range hash.Keys {
+		if hashKey.Type() != key.Type() {
+			continue
+		}
+		switch key.Type() {
+		case OBJECT_STRING:
+			if hashKey.(*ObjectString).Value == key.(*ObjectString).Value {
+				return hash.Values[index]
+			}
+		case OBJECT_INTEGER:
+			if hashKey.(*ObjectInteger).Value == key.(*ObjectInteger).Value {
+				return hash.Values[index]
+			}
+		case OBJECT_BOOLEAN:
+			if hashKey.(*ObjectBoolean).Value == key.(*ObjectBoolean).Value {
+				return hash.Values[index]
+			}
+		default:
+			continue
+		}
+	}
+	return &ObjectNull{}
+}
