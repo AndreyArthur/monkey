@@ -31,6 +31,8 @@ func TestEvalExpressions(t *testing.T) {
 		{"\"Hello, \" + \"World!\";", evaluating.OBJECT_STRING, "\"Hello, World!\""},
 		{"{4 - 2: false, !0: true, \"hello\": \"world\"}", evaluating.OBJECT_HASH, "{2: false, true: true, \"hello\": \"world\"}"},
 		{"{4 - 2: false, !0: true, \"hello\": \"world\"}[\"hello\"]", evaluating.OBJECT_STRING, "\"world\""},
+		{"if (1 > 0) { true; } else { false; };", evaluating.OBJECT_BOOLEAN, true},
+		{"if (1 < 0) { true; } else { false; };", evaluating.OBJECT_BOOLEAN, false},
 	}
 
 	for _, expectation := range expectations {

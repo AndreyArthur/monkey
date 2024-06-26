@@ -380,6 +380,17 @@ func evalIndex(
 	}
 }
 
+func evalIfElse(
+	environment *Environment,
+	ifElse *parsing.AstIfElse,
+) Object {
+	condition := Eval(environment, ifElse.Condition)
+	if condition.Truthiness() == true {
+		return Eval(environment, ifElse.Then)
+	}
+	return Eval(environment, ifElse.Else)
+}
+
 func Eval(environment *Environment, ast parsing.AstNode) Object {
 	switch ast.Type() {
 	case parsing.AST_COMPOUND:
@@ -450,6 +461,11 @@ func Eval(environment *Environment, ast parsing.AstNode) Object {
 		return evalIndex(
 			environment,
 			ast.(*parsing.AstIndex),
+		)
+	case parsing.AST_IF_ELSE:
+		return evalIfElse(
+			environment,
+			ast.(*parsing.AstIfElse),
 		)
 	default:
 		// the switch will be exaustive so this should never happen
