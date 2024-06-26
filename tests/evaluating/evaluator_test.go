@@ -27,6 +27,7 @@ func TestEvalExpressions(t *testing.T) {
 		{"fn (a, b) { return a + b; };", evaluating.OBJECT_FUNCTION, "fn (a, b)"},
 		{"fn (a, b) { return a + b; }(1, 2);", evaluating.OBJECT_INTEGER, 3},
 		{"fn (a) { return fn (b) { return a + b; }; }(2)(1);", evaluating.OBJECT_INTEGER, 3},
+		{"[!2, 4 + 8, true, false];", evaluating.OBJECT_ARRAY, "[false, 12, true, false]"},
 	}
 
 	for _, expectation := range expectations {
@@ -61,20 +62,20 @@ func TestEvalExpressions(t *testing.T) {
 					object.(*evaluating.ObjectBoolean).Value,
 				)
 			}
-		case *evaluating.ObjectFunction:
-			if object.Inspect() != string(expectation.output.(string)) {
-				t.Fatalf(
-					"Expected %v, got %v.",
-					expectation.output,
-					object.(*evaluating.ObjectFunction).Inspect(),
-				)
-			}
 		case *evaluating.ObjectNull:
 			if expectation.output != nil {
 				t.Fatalf(
 					"Expected %v, got %v.",
 					expectation.output,
 					object.(*evaluating.ObjectNull),
+				)
+			}
+		default:
+			if object.Inspect() != string(expectation.output.(string)) {
+				t.Fatalf(
+					"Expected %v, got %v.",
+					expectation.output,
+					object.Inspect(),
 				)
 			}
 		}

@@ -11,6 +11,7 @@ const (
 	OBJECT_INTEGER
 	OBJECT_BOOLEAN
 	OBJECT_NULL
+	OBJECT_ARRAY
 	OBJECT_FUNCTION
 )
 
@@ -26,6 +27,8 @@ func ObjectTypeToString(objectType ObjectType) string {
 		return "error"
 	case OBJECT_FUNCTION:
 		return "function"
+	case OBJECT_ARRAY:
+		return "array"
 	default:
 		return "unknown"
 	}
@@ -118,5 +121,27 @@ func (function *ObjectFunction) Inspect() string {
 	return text
 }
 func (function *ObjectFunction) Truthiness() bool {
+	return true
+}
+
+type ObjectArray struct {
+	Items []Object
+}
+
+func (array *ObjectArray) Type() ObjectType {
+	return OBJECT_ARRAY
+}
+func (array *ObjectArray) Inspect() string {
+	text := "["
+	for index, element := range array.Items {
+		text += element.Inspect()
+		if index < len(array.Items)-1 {
+			text += ", "
+		}
+	}
+	text += "]"
+	return text
+}
+func (array *ObjectArray) Truthiness() bool {
 	return true
 }

@@ -237,7 +237,7 @@ func evalFunctionDefinition(
 	}
 }
 
-func evalArguments(
+func evalExpressions(
 	environment *Environment,
 	expressions []parsing.AstExpression,
 ) []Object {
@@ -279,11 +279,22 @@ func evalFunctionCall(
 	if function.Type() != OBJECT_FUNCTION {
 		return objectErrorNotCallable(functionCall.Left)
 	}
-	arguments := evalArguments(
+	arguments := evalExpressions(
 		environment,
 		functionCall.Arguments,
 	)
 	return applyFunction(function.(*ObjectFunction), arguments)
+}
+
+func evalArrayLiteral(
+	environment *Environment,
+	arrayLiteral *parsing.AstArrayLiteral,
+) Object {
+	items := evalExpressions(
+		environment,
+		arrayLiteral.Items,
+	)
+	return &ObjectArray{Items: items}
 }
 
 func Eval(environment *Environment, ast parsing.AstNode) Object {
@@ -337,6 +348,11 @@ func Eval(environment *Environment, ast parsing.AstNode) Object {
 		return evalFunctionCall(
 			environment,
 			ast.(*parsing.AstFunctionCall),
+		)
+	case parsing.AST_ARRAY_LITERAL:
+		return evalArrayLiteral(
+			environment,
+			ast.(*parsing.AstArrayLiteral),
 		)
 	default:
 		// the switch will be exaustive so this should never happen
