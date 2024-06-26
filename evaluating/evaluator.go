@@ -184,9 +184,15 @@ func evalLetStatement(
 	environment *Environment,
 	letStatement *parsing.AstLetStatement,
 ) Object {
+	var value Object
+	if letStatement.Value == nil {
+		value = &ObjectNull{}
+	} else {
+		value = Eval(environment, letStatement.Value)
+	}
 	environment.Set(
 		letStatement.Identifier.Name,
-		Eval(environment, letStatement.Value),
+		value,
 	)
 	return &ObjectNull{}
 }
