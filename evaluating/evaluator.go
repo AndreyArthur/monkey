@@ -59,6 +59,10 @@ func objectErrorUnknownPrefixOperator(
 	)
 }
 
+func objectErrorIdentifierNotFound(name string) Object {
+	return objectError("Identifier not found: %q.", name)
+}
+
 func evalCompound(
 	environment *Environment,
 	compound *parsing.AstCompound,
@@ -207,6 +211,17 @@ func evalReturnStatement(
 	return Eval(environment, returnStatement.Value)
 }
 
+func evalIdentifier(
+	environment *Environment,
+	identifier *parsing.AstIdentifier,
+) Object {
+	object := environment.Get(identifier.Name)
+	if object == nil {
+		return objectErrorIdentifierNotFound(identifier.Name)
+	}
+	return object
+}
+
 func Eval(environment *Environment, ast parsing.AstNode) Object {
 	switch ast.Type() {
 	case parsing.AST_COMPOUND:
@@ -226,16 +241,6 @@ func Eval(environment *Environment, ast parsing.AstNode) Object {
 			environment,
 			ast.(*parsing.AstReturnStatement),
 		)
-	case parsing.AST_INFIX_EXPRESSION:
-		return evalInfixExpression(
-			environment,
-			ast.(*parsing.AstInfixExpression),
-		)
-	case parsing.AST_PREFIX_EXPRESSION:
-		return evalPrefixExpression(
-			environment,
-			ast.(*parsing.AstPrefixExpression),
-		)
 	case parsing.AST_INTEGER_LITERAL:
 		return &ObjectInteger{
 			Value: ast.(*parsing.AstIntegerLiteral).Value,
@@ -244,6 +249,21 @@ func Eval(environment *Environment, ast parsing.AstNode) Object {
 		return &ObjectBoolean{
 			Value: ast.(*parsing.AstBooleanLiteral).Value,
 		}
+	case parsing.AST_PREFIX_EXPRESSION:
+		return evalPrefixExpression(
+			environment,
+			ast.(*parsing.AstPrefixExpression),
+		)
+	case parsing.AST_INFIX_EXPRESSION:
+		return evalInfixExpression(
+			environment,
+			ast.(*parsing.AstInfixExpression),
+		)
+	case parsing.AST_IDENTIFIER:
+		return evalIdentifier(
+			environment,
+			ast.(*parsing.AstIdentifier),
+		)
 	default:
 		// the switch will be exaustive so this should never happen
 		return nil

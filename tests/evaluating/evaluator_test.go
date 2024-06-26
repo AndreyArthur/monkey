@@ -23,6 +23,7 @@ func TestEval(t *testing.T) {
 		{"return;", evaluating.OBJECT_NULL, nil},
 		{"return; 2;", evaluating.OBJECT_NULL, nil},
 		{"return true; 2;", evaluating.OBJECT_BOOLEAN, true},
+		{"let a = true; a;", evaluating.OBJECT_BOOLEAN, true},
 	}
 
 	for _, expectation := range expectations {
@@ -78,6 +79,7 @@ func TestEvalError(t *testing.T) {
 		{"true + true;", "Type mismatch: boolean + boolean."},
 		{"true + 2;", "Type mismatch: boolean + integer."},
 		{"2 * false;", "Type mismatch: integer * boolean."},
+		{"a;", "Identifier not found: \"a\"."},
 	}
 
 	for _, expectation := range expectations {
