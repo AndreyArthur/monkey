@@ -3,20 +3,23 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"monkey/evaluating"
 	"monkey/lexing"
 	"monkey/parsing"
 	"os"
+	"strings"
 )
 
 const PROMPT = ">> "
 
 func main() {
-	fmt.Println("Monkey language RPPL (Read Parse Print Loop).")
+	fmt.Println("Monkey language REPL (Read Eval Print Loop).")
 
 	in := os.Stdin
 	out := os.Stdout
 
 	scanner := bufio.NewScanner(in)
+	content := ""
 
 	for {
 		fmt.Fprintf(out, PROMPT)
@@ -26,13 +29,18 @@ func main() {
 			return
 		}
 
-		content := scanner.Text()
+		current := scanner.Text()
+		current = strings.TrimSpace(current)
 
-		if content == "exit" {
+		if current == "exit" {
 			return
 		}
 
-		lexer := lexing.NewLexer(content)
+		if current[len(current)-1] != ';' {
+			current += ";"
+		}
+
+		lexer := lexing.NewLexer(content + current)
 		parser := parsing.NewParser(lexer)
 		ast := parser.Parse()
 
@@ -40,9 +48,15 @@ func main() {
 			for _, error := range parser.GetErrors() {
 				fmt.Println(error)
 			}
-		} else {
-			fmt.Println(ast.String())
+			continue
 		}
+
+		content += current
+
+		env := evaluating.NewEnvironment(nil)
+		object := evaluating.Eval(env, ast)
+
+		fmt.Println(object.Inspect())
 	}
 
 }
