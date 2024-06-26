@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestEval(t *testing.T) {
+func TestEvalExpressions(t *testing.T) {
 	expectations := []struct {
 		input      string
 		objectType evaluating.ObjectType
@@ -24,7 +24,9 @@ func TestEval(t *testing.T) {
 		{"return; 2;", evaluating.OBJECT_NULL, nil},
 		{"return true; 2;", evaluating.OBJECT_BOOLEAN, true},
 		{"let a = true; a;", evaluating.OBJECT_BOOLEAN, true},
-		{"fn (a, b) { return a + b; }", evaluating.OBJECT_FUNCTION, "fn (a, b)"},
+		{"fn (a, b) { return a + b; };", evaluating.OBJECT_FUNCTION, "fn (a, b)"},
+		{"fn (a, b) { return a + b; }(1, 2);", evaluating.OBJECT_INTEGER, 3},
+		{"fn (a) { return fn (b) { return a + b; }; }(2)(1);", evaluating.OBJECT_INTEGER, 3},
 	}
 
 	for _, expectation := range expectations {
@@ -36,9 +38,9 @@ func TestEval(t *testing.T) {
 
 		if object.Type() != expectation.objectType {
 			t.Fatalf(
-				"Expected %d, got %d.",
-				expectation.objectType,
-				object.Type(),
+				"Expected object type to be %s, got %s.",
+				evaluating.ObjectTypeToString(expectation.objectType),
+				evaluating.ObjectTypeToString(object.Type()),
 			)
 		}
 

@@ -22,6 +22,10 @@ func ObjectTypeToString(objectType ObjectType) string {
 		return "integer"
 	case OBJECT_BOOLEAN:
 		return "boolean"
+	case OBJECT_ERROR:
+		return "error"
+	case OBJECT_FUNCTION:
+		return "function"
 	default:
 		return "unknown"
 	}

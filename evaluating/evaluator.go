@@ -63,6 +63,10 @@ func objectErrorIdentifierNotFound(name string) Object {
 	return objectError("Identifier not found: %q.", name)
 }
 
+func objectErrorNotCallable(expression parsing.AstExpression) Object {
+	return objectError("Expression %q is not a callable.", expression.String)
+}
+
 func evalCompound(
 	environment *Environment,
 	compound *parsing.AstCompound,
@@ -233,6 +237,55 @@ func evalFunctionDefinition(
 	}
 }
 
+func evalArguments(
+	environment *Environment,
+	expressions []parsing.AstExpression,
+) []Object {
+	objects := make([]Object, len(expressions))
+	for i, expression := range expressions {
+		objects[i] = Eval(environment, expression)
+	}
+	return objects
+}
+
+func extendFunctionEnvironment(
+	function *ObjectFunction,
+	arguments []Object,
+) *Environment {
+	environment := NewEnvironment(function.Environment)
+	for i, parameter := range function.Parameters {
+		environment.Set(parameter.Name, arguments[i])
+	}
+	return environment
+}
+
+func applyFunction(
+	function *ObjectFunction,
+	arguments []Object,
+) Object {
+	extendedEnvironment := extendFunctionEnvironment(
+		function,
+		arguments,
+	)
+	evaluated := Eval(extendedEnvironment, function.Body)
+	return evaluated
+}
+
+func evalFunctionCall(
+	environment *Environment,
+	functionCall *parsing.AstFunctionCall,
+) Object {
+	function := Eval(environment, functionCall.Left)
+	if function.Type() != OBJECT_FUNCTION {
+		return objectErrorNotCallable(functionCall.Left)
+	}
+	arguments := evalArguments(
+		environment,
+		functionCall.Arguments,
+	)
+	return applyFunction(function.(*ObjectFunction), arguments)
+}
+
 func Eval(environment *Environment, ast parsing.AstNode) Object {
 	switch ast.Type() {
 	case parsing.AST_COMPOUND:
@@ -279,6 +332,11 @@ func Eval(environment *Environment, ast parsing.AstNode) Object {
 		return evalFunctionDefinition(
 			environment,
 			ast.(*parsing.AstFunctionDefinition),
+		)
+	case parsing.AST_FUNCTION_CALL:
+		return evalFunctionCall(
+			environment,
+			ast.(*parsing.AstFunctionCall),
 		)
 	default:
 		// the switch will be exaustive so this should never happen
