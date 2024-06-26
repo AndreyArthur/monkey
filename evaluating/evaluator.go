@@ -177,6 +177,17 @@ func evalPrefixExpression(
 	return evalPrefixOperation(prefixExpression.Operator, right)
 }
 
+func evalLetStatement(
+	environment *Environment,
+	letStatement *parsing.AstLetStatement,
+) Object {
+	environment.Set(
+		letStatement.Identifier.Name,
+		Eval(environment, letStatement.Value),
+	)
+	return &ObjectNull{}
+}
+
 func Eval(environment *Environment, ast parsing.AstNode) Object {
 	switch ast.Type() {
 	case parsing.AST_COMPOUND:
@@ -185,6 +196,11 @@ func Eval(environment *Environment, ast parsing.AstNode) Object {
 		return evalExpressionStatement(
 			environment,
 			ast.(*parsing.AstExpressionStatement),
+		)
+	case parsing.AST_LET_STATEMENT:
+		return evalLetStatement(
+			environment,
+			ast.(*parsing.AstLetStatement),
 		)
 	case parsing.AST_INFIX_EXPRESSION:
 		return evalInfixExpression(

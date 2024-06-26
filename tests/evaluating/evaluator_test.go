@@ -19,6 +19,7 @@ func TestEval(t *testing.T) {
 		{"!2 == true;", evaluating.OBJECT_BOOLEAN, false},
 		{"5 / 2;", evaluating.OBJECT_INTEGER, 2},
 		{"1 + 7 * 2;", evaluating.OBJECT_INTEGER, 15},
+		{"let a = 2;", evaluating.OBJECT_NULL, nil},
 	}
 
 	for _, expectation := range expectations {
@@ -51,6 +52,14 @@ func TestEval(t *testing.T) {
 					"Expected %v, got %v.",
 					expectation.output,
 					object.(*evaluating.ObjectBoolean).Value,
+				)
+			}
+		case *evaluating.ObjectNull:
+			if expectation.output != nil {
+				t.Fatalf(
+					"Expected %v, got %v.",
+					expectation.output,
+					object.(*evaluating.ObjectNull),
 				)
 			}
 		}

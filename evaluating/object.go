@@ -7,6 +7,7 @@ const (
 	OBJECT_ERROR
 	OBJECT_INTEGER
 	OBJECT_BOOLEAN
+	OBJECT_NULL
 )
 
 type ObjectType int
@@ -40,6 +41,18 @@ func (error *ObjectError) Inspect() string {
 }
 func (error *ObjectError) Truthiness() bool {
 	return true
+}
+
+type ObjectNull struct{}
+
+func (null *ObjectNull) Type() ObjectType {
+	return OBJECT_NULL
+}
+func (null *ObjectNull) Inspect() string {
+	return "null"
+}
+func (null *ObjectNull) Truthiness() bool {
+	return false
 }
 
 type ObjectInteger struct {
