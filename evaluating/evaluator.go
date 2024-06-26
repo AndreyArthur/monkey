@@ -67,6 +67,16 @@ func objectErrorNotCallable(expression parsing.AstExpression) Object {
 	return objectError("Expression %q is not a callable.", expression.String)
 }
 
+func objectErrorUnsupportedIndex(indexType ObjectType) Object {
+	return objectError(
+		"Unsupported index, must be of type %s, %s, or %s, got type %s.",
+		ObjectTypeToString(OBJECT_INTEGER),
+		ObjectTypeToString(OBJECT_STRING),
+		ObjectTypeToString(OBJECT_BOOLEAN),
+		ObjectTypeToString(indexType),
+	)
+}
+
 func evalCompound(
 	environment *Environment,
 	compound *parsing.AstCompound,
@@ -311,6 +321,27 @@ func evalArrayLiteral(
 	return &ObjectArray{Items: items}
 }
 
+func evalHashLiteral(
+	environment *Environment,
+	hashLiteral *parsing.AstHashLiteral,
+) Object {
+	object := &ObjectHash{
+		Keys:   []Object{},
+		Values: []Object{},
+	}
+	for _, pair := range hashLiteral.Pairs {
+		key := Eval(environment, pair.Key)
+		if key.Type() != OBJECT_STRING &&
+			key.Type() != OBJECT_INTEGER &&
+			key.Type() != OBJECT_BOOLEAN {
+			return objectErrorUnsupportedIndex(key.Type())
+		}
+		object.Keys = append(object.Keys, Eval(environment, pair.Key))
+		object.Values = append(object.Values, Eval(environment, pair.Value))
+	}
+	return object
+}
+
 func Eval(environment *Environment, ast parsing.AstNode) Object {
 	switch ast.Type() {
 	case parsing.AST_COMPOUND:
@@ -372,6 +403,11 @@ func Eval(environment *Environment, ast parsing.AstNode) Object {
 		return &ObjectString{
 			Value: ast.(*parsing.AstStringLiteral).Value,
 		}
+	case parsing.AST_HASH_LITERAL:
+		return evalHashLiteral(
+			environment,
+			ast.(*parsing.AstHashLiteral),
+		)
 	default:
 		// the switch will be exaustive so this should never happen
 		return nil

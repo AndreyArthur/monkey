@@ -13,6 +13,7 @@ const (
 	OBJECT_NULL
 	OBJECT_ARRAY
 	OBJECT_FUNCTION
+	OBJECT_HASH
 	OBJECT_STRING
 )
 
@@ -161,5 +162,28 @@ func (string *ObjectString) Truthiness() bool {
 	if string.Value == "" {
 		return false
 	}
+	return true
+}
+
+type ObjectHash struct {
+	Keys   []Object
+	Values []Object
+}
+
+func (hash *ObjectHash) Type() ObjectType {
+	return OBJECT_HASH
+}
+func (hash *ObjectHash) Inspect() string {
+	text := "{"
+	for index, key := range hash.Keys {
+		text += key.Inspect() + ": " + hash.Values[index].Inspect()
+		if index < len(hash.Keys)-1 {
+			text += ", "
+		}
+	}
+	text += "}"
+	return text
+}
+func (hash *ObjectHash) Truthiness() bool {
 	return true
 }

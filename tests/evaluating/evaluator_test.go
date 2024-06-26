@@ -29,7 +29,7 @@ func TestEvalExpressions(t *testing.T) {
 		{"fn (a) { return fn (b) { return a + b; }; }(2)(1);", evaluating.OBJECT_INTEGER, 3},
 		{"[!2, 4 + 8, true, false];", evaluating.OBJECT_ARRAY, "[false, 12, true, false]"},
 		{"\"Hello, \" + \"World!\";", evaluating.OBJECT_STRING, "\"Hello, World!\""},
-	}
+		{"{4 - 2: false, !0: true, \"hello\": \"world\"}", evaluating.OBJECT_HASH, "{2: false, true: true, \"hello\": \"world\"}"}}
 
 	for _, expectation := range expectations {
 		lexer := lexing.NewLexer(expectation.input)
