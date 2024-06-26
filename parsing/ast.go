@@ -287,7 +287,7 @@ type AstArrayLiteral struct {
 
 func (arrayLiteral *AstArrayLiteral) expression() {}
 func (arrayLiteral *AstArrayLiteral) Type() AstType {
-	return AST_STRING_LITERAL
+	return AST_ARRAY_LITERAL
 }
 func (arrayLiteral *AstArrayLiteral) TokenLiteral() string {
 	return arrayLiteral.Token.Literal
