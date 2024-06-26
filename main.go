@@ -6,7 +6,6 @@ import (
 	"monkey/lexing"
 	"monkey/parsing"
 	"os"
-	"strings"
 )
 
 const PROMPT = ">> "
