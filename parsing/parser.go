@@ -38,10 +38,11 @@ func getPrecedence(tokenType lexing.TokenType) int {
 }
 
 type Parser struct {
-	tokens   []*lexing.Token
-	position int
-	current  *lexing.Token
-	errors   []string
+	tokens       []*lexing.Token
+	position     int
+	current      *lexing.Token
+	errors       []string
+	currentError string
 }
 
 func NewParser(lexer *lexing.Lexer) *Parser {
@@ -62,9 +63,19 @@ func NewParser(lexer *lexing.Lexer) *Parser {
 	}
 }
 
-func (parser *Parser) addError(message string) {
-	parser.errors = append(parser.errors, message)
+func (parser *Parser) commitError() {
+	if parser.currentError == "" {
+		return
+	}
+	parser.errors = append(parser.errors, parser.currentError)
+	parser.currentError = ""
 	return
+}
+
+func (parser *Parser) error(message string) {
+	if parser.currentError == "" {
+		parser.currentError = message
+	}
 }
 
 func (parser *Parser) expect(tokenTypes ...lexing.TokenType) {
@@ -78,7 +89,7 @@ func (parser *Parser) expect(tokenTypes ...lexing.TokenType) {
 			tokenTypesString += ", "
 		}
 	}
-	parser.addError(fmt.Sprintf(
+	parser.error(fmt.Sprintf(
 		"Expected token of type %s. Found token %q of type %s.",
 		tokenTypesString,
 		parser.current.Literal,
@@ -174,6 +185,7 @@ func (parser *Parser) parseFunctionCall(left AstExpression) *AstFunctionCall {
 		Arguments: []AstExpression{},
 	}
 	parser.advance()
+
 	for parser.current.Type != lexing.TOKEN_CLOSE_PAREN {
 		expression := parser.parseExpression(PRECEDENCE_LOWEST)
 		functionCall.Arguments = append(functionCall.Arguments, expression)
@@ -187,10 +199,11 @@ func (parser *Parser) parseFunctionCall(left AstExpression) *AstFunctionCall {
 			}
 		}
 	}
+
 	parser.expect(lexing.TOKEN_CLOSE_PAREN)
-	if parser.current.Type == lexing.TOKEN_CLOSE_PAREN {
-		parser.advance()
-	}
+	parser.advance()
+
+	parser.commitError()
 	return functionCall
 }
 
@@ -200,9 +213,13 @@ func (parser *Parser) parseIndex(left AstExpression) *AstIndex {
 		Left:  left,
 	}
 	parser.advance()
+
 	index.Index = parser.parseExpression(PRECEDENCE_LOWEST)
+
 	parser.expect(lexing.TOKEN_CLOSE_BRACKET)
 	parser.advance()
+
+	parser.commitError()
 	return index
 }
 
@@ -237,10 +254,9 @@ func (parser *Parser) parseArrayLiteral() *AstArrayLiteral {
 	}
 
 	parser.expect(lexing.TOKEN_CLOSE_BRACKET)
-	if parser.current.Type == lexing.TOKEN_CLOSE_BRACKET {
-		parser.advance()
-	}
+	parser.advance()
 
+	parser.commitError()
 	return arrayLiteral
 }
 
@@ -275,10 +291,9 @@ func (parser *Parser) parseHashLiteral() *AstHashLiteral {
 	}
 
 	parser.expect(lexing.TOKEN_CLOSE_BRACE)
-	if parser.current.Type == lexing.TOKEN_CLOSE_BRACE {
-		parser.advance()
-	}
+	parser.advance()
 
+	parser.commitError()
 	return hashLiteral
 }
 
@@ -337,6 +352,7 @@ func (parser *Parser) parseFunctionDefinition() *AstFunctionDefinition {
 	parser.expect(lexing.TOKEN_CLOSE_BRACE)
 	parser.advance()
 
+	parser.commitError()
 	return functionDefinition
 }
 
@@ -383,8 +399,11 @@ func (parser *Parser) parseExpressionStatement() *AstExpressionStatement {
 		Token:      parser.current,
 		Expression: parser.parseExpression(PRECEDENCE_LOWEST),
 	}
+
 	parser.expect(lexing.TOKEN_SEMICOLON)
 	parser.advance()
+
+	parser.commitError()
 	return expressionStatement
 }
 
@@ -403,6 +422,8 @@ func (parser *Parser) parseLetStatement() *AstLetStatement {
 
 	parser.expect(lexing.TOKEN_SEMICOLON)
 	parser.advance()
+
+	parser.commitError()
 	return letStatement
 }
 
@@ -416,6 +437,8 @@ func (parser *Parser) parseReturnStatement() *AstReturnStatement {
 
 	parser.expect(lexing.TOKEN_SEMICOLON)
 	parser.advance()
+
+	parser.commitError()
 	return returnStatement
 }
 
@@ -435,5 +458,6 @@ func (parser *Parser) Parse() *AstCompound {
 
 	parser.expect(lexing.TOKEN_EOF)
 
+	parser.commitError()
 	return compound
 }

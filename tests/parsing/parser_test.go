@@ -42,7 +42,7 @@ func TestParseExpressionStatement(t *testing.T) {
 			for _, error := range parser.GetErrors() {
 				t.Log(error)
 			}
-			t.Fail()
+			t.FailNow()
 		}
 
 		output := ast.String()
