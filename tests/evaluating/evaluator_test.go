@@ -24,6 +24,7 @@ func TestEval(t *testing.T) {
 		{"return; 2;", evaluating.OBJECT_NULL, nil},
 		{"return true; 2;", evaluating.OBJECT_BOOLEAN, true},
 		{"let a = true; a;", evaluating.OBJECT_BOOLEAN, true},
+		{"fn (a, b) { return a + b; }", evaluating.OBJECT_FUNCTION, "fn (a, b)"},
 	}
 
 	for _, expectation := range expectations {
@@ -56,6 +57,14 @@ func TestEval(t *testing.T) {
 					"Expected %v, got %v.",
 					expectation.output,
 					object.(*evaluating.ObjectBoolean).Value,
+				)
+			}
+		case *evaluating.ObjectFunction:
+			if object.Inspect() != string(expectation.output.(string)) {
+				t.Fatalf(
+					"Expected %v, got %v.",
+					expectation.output,
+					object.(*evaluating.ObjectFunction).Inspect(),
 				)
 			}
 		case *evaluating.ObjectNull:

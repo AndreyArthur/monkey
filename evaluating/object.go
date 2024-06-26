@@ -1,6 +1,9 @@
 package evaluating
 
-import "fmt"
+import (
+	"fmt"
+	"monkey/parsing"
+)
 
 const (
 	_ = iota
@@ -8,6 +11,7 @@ const (
 	OBJECT_INTEGER
 	OBJECT_BOOLEAN
 	OBJECT_NULL
+	OBJECT_FUNCTION
 )
 
 type ObjectType int
@@ -84,4 +88,31 @@ func (boolean *ObjectBoolean) Inspect() string {
 }
 func (boolean *ObjectBoolean) Truthiness() bool {
 	return boolean.Value
+}
+
+type ObjectFunction struct {
+	Parameters  []*parsing.AstIdentifier
+	Body        *parsing.AstCompound
+	Environment *Environment
+}
+
+func (function *ObjectFunction) Type() ObjectType {
+	return OBJECT_FUNCTION
+}
+func (function *ObjectFunction) Inspect() string {
+	text := "fn ("
+
+	for index, parameter := range function.Parameters {
+		text += parameter.String()
+		if index < len(function.Parameters)-1 {
+			text += ", "
+		}
+	}
+
+	text += ")"
+
+	return text
+}
+func (function *ObjectFunction) Truthiness() bool {
+	return true
 }

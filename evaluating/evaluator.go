@@ -222,6 +222,17 @@ func evalIdentifier(
 	return object
 }
 
+func evalFunctionDefinition(
+	environment *Environment,
+	functionDefinition *parsing.AstFunctionDefinition,
+) Object {
+	return &ObjectFunction{
+		Parameters:  functionDefinition.Parameters,
+		Body:        functionDefinition.Body,
+		Environment: environment,
+	}
+}
+
 func Eval(environment *Environment, ast parsing.AstNode) Object {
 	switch ast.Type() {
 	case parsing.AST_COMPOUND:
@@ -263,6 +274,11 @@ func Eval(environment *Environment, ast parsing.AstNode) Object {
 		return evalIdentifier(
 			environment,
 			ast.(*parsing.AstIdentifier),
+		)
+	case parsing.AST_FUNCTION_DEFINITION:
+		return evalFunctionDefinition(
+			environment,
+			ast.(*parsing.AstFunctionDefinition),
 		)
 	default:
 		// the switch will be exaustive so this should never happen
