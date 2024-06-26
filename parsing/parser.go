@@ -379,11 +379,6 @@ func (parser *Parser) parseIfElse() *AstIfElse {
 	parser.advance()
 
 	if parser.current.Type != lexing.TOKEN_ELSE {
-		ifElse.Else = &AstCompound{
-			Token:      ifElse.Token,
-			Statements: []AstStatement{},
-		}
-
 		parser.commitError()
 		return ifElse
 	}
@@ -463,10 +458,19 @@ func (parser *Parser) parseLetStatement() *AstLetStatement {
 
 	letStatement.Identifier = parser.parseIdentifier()
 
-	parser.expect(lexing.TOKEN_ASSIGN)
-	parser.advance()
+	if parser.current.Type == lexing.TOKEN_ASSIGN {
+		parser.advance()
 
-	letStatement.Value = parser.parseExpression(PRECEDENCE_LOWEST)
+		letStatement.Value = parser.parseExpression(PRECEDENCE_LOWEST)
+
+		if letStatement.Value == nil {
+			parser.error(fmt.Sprintf(
+				"Expected expression. Found token %q of type %s.",
+				parser.current.Literal,
+				lexing.TokenTypeToString(parser.current.Type),
+			))
+		}
+	}
 
 	parser.expect(lexing.TOKEN_SEMICOLON)
 	parser.advance()

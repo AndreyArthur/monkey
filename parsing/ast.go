@@ -95,12 +95,15 @@ func (letStatement *AstLetStatement) TokenLiteral() string {
 	return letStatement.Token.Literal
 }
 func (letStatement *AstLetStatement) String() string {
-	return letStatement.TokenLiteral() +
+	text := letStatement.TokenLiteral() +
 		" " +
-		letStatement.Identifier.String() +
-		" = " +
-		letStatement.Value.String() +
-		";"
+		letStatement.Identifier.String()
+	if letStatement.Value != nil {
+		text += " = " + letStatement.Value.String()
+	}
+	text += ";"
+
+	return text
 }
 
 type AstReturnStatement struct {
@@ -116,10 +119,13 @@ func (returnStatement *AstReturnStatement) TokenLiteral() string {
 	return returnStatement.Token.Literal
 }
 func (returnStatement *AstReturnStatement) String() string {
-	return returnStatement.TokenLiteral() +
-		" " +
-		returnStatement.Value.String() +
-		";"
+	text := returnStatement.TokenLiteral()
+	if returnStatement.Value != nil {
+		text += " " + returnStatement.Value.String()
+	}
+	text += ";"
+
+	return text
 }
 
 type AstIntegerLiteral struct {
@@ -380,7 +386,7 @@ func (ifElse *AstIfElse) String() string {
 		ifElse.Then.String() +
 		" }"
 
-	if len(ifElse.Else.Statements) >= 1 {
+	if ifElse.Else != nil {
 		text += " else { " + ifElse.Else.String() + " }"
 	}
 	return text

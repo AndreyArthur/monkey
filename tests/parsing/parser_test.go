@@ -67,6 +67,7 @@ func TestParseLetStatement(t *testing.T) {
 		{"let a = -1;", "let a = (-1);"},
 		{"let b = true;", "let b = true;"},
 		{"let c = \"Hello, World\";", "let c = \"Hello, World\";"},
+		{"let d;", "let d;"},
 	}
 
 	for _, expectation := range expectations {
@@ -101,6 +102,7 @@ func TestParseReturnStatement(t *testing.T) {
 		{"return -1;", "return (-1);"},
 		{"return true;", "return true;"},
 		{"return \"Hello, World\";", "return \"Hello, World\";"},
+		{"return;", "return;"},
 	}
 
 	for _, expectation := range expectations {
@@ -144,6 +146,7 @@ func TestParserErrors(t *testing.T) {
 		{"if true {};", `Expected token of type open paren. Found token "true" of type true.`},
 		{"if (true) 2;", `Expected token of type open brace. Found token "2" of type integer.`},
 		{"if (true) { 2; } else false;", `Expected token of type open brace. Found token "false" of type false.`},
+		{"let a =;", `Expected expression. Found token ";" of type semicolon.`},
 	}
 
 	for _, expectation := range expectations {
