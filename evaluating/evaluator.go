@@ -100,6 +100,31 @@ func objectErrorWrongNumberOfArguments(
 	)
 }
 
+func InjectBuiltinFunctions(environment *Environment) {
+	environment.Set("len", &ObjectBuiltin{
+		Function: func(arguments ...Object) Object {
+			if len(arguments) != 1 {
+				return objectErrorWrongNumberOfArguments(1, len(arguments))
+			}
+
+			object := arguments[0]
+
+			switch arguments[0].Type() {
+			case OBJECT_STRING:
+				return &ObjectInteger{Value: int64(len(object.(*ObjectString).Value))}
+			case OBJECT_ARRAY:
+				return &ObjectInteger{Value: int64(len(object.(*ObjectArray).Items))}
+			default:
+				return objectError(
+					"Type builtin function %q expects a string or array, got %s.",
+					"len",
+					ObjectTypeToString(object.Type()),
+				)
+			}
+		},
+	})
+}
+
 func evalCompound(
 	environment *Environment,
 	compound *parsing.AstCompound,
@@ -336,13 +361,16 @@ func evalFunctionCall(
 	functionCall *parsing.AstFunctionCall,
 ) Object {
 	function := Eval(environment, functionCall.Left)
-	if function.Type() != OBJECT_FUNCTION {
+	if function.Type() != OBJECT_FUNCTION && function.Type() != OBJECT_BUILTIN {
 		return objectErrorNotCallable(functionCall.Left)
 	}
 	arguments := evalExpressions(
 		environment,
 		functionCall.Arguments,
 	)
+	if function.Type() == OBJECT_BUILTIN {
+		return function.(*ObjectBuiltin).Function(arguments...)
+	}
 	argumentsLen := len(arguments)
 	parametersLen := len(function.(*ObjectFunction).Parameters)
 	if argumentsLen != parametersLen {

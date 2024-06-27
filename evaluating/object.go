@@ -16,6 +16,7 @@ const (
 	OBJECT_HASH
 	OBJECT_STRING
 	OBJECT_RETURN_VALUE
+	OBJECT_BUILTIN
 )
 
 type ObjectType int
@@ -40,6 +41,8 @@ func ObjectTypeToString(objectType ObjectType) string {
 		return "string"
 	case OBJECT_RETURN_VALUE:
 		return "return value"
+	case OBJECT_BUILTIN:
+		return "builtin"
 	default:
 		return "unknown"
 	}
@@ -233,4 +236,20 @@ func (returnValue *ObjectReturnValue) Inspect() string {
 }
 func (returnValue *ObjectReturnValue) Truthiness() bool {
 	return returnValue.Value.Truthiness()
+}
+
+type BuiltinFunction func(arguments ...Object) Object
+
+type ObjectBuiltin struct {
+	Function BuiltinFunction
+}
+
+func (builtin *ObjectBuiltin) Type() ObjectType {
+	return OBJECT_BUILTIN
+}
+func (builtin *ObjectBuiltin) Inspect() string {
+	return "fn (...)"
+}
+func (builtin *ObjectBuiltin) Truthiness() bool {
+	return true
 }

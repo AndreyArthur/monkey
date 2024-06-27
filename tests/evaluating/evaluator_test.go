@@ -84,6 +84,71 @@ func TestEvalExpressions(t *testing.T) {
 	}
 }
 
+func TestBuiltins(t *testing.T) {
+	expectations := []struct {
+		input      string
+		objectType evaluating.ObjectType
+		output     any
+	}{
+		{"len(\"Hello, World!\");", evaluating.OBJECT_INTEGER, 13},
+		{"len(\"\");", evaluating.OBJECT_INTEGER, 0},
+		{"len([1, true, fn () { return \"hello\"; }]);", evaluating.OBJECT_INTEGER, 3},
+		{"len(2);", evaluating.OBJECT_ERROR, "Type builtin function \"len\" expects a string or array, got integer."},
+	}
+
+	for _, expectation := range expectations {
+		lexer := lexing.NewLexer(expectation.input)
+		parser := parsing.NewParser(lexer)
+		ast := parser.Parse()
+		environment := evaluating.NewEnvironment(nil)
+		evaluating.InjectBuiltinFunctions(environment)
+		object := evaluating.Eval(environment, ast)
+
+		if object.Type() != expectation.objectType {
+			t.Fatalf(
+				"Expected object type to be %s, got %s.",
+				evaluating.ObjectTypeToString(expectation.objectType),
+				evaluating.ObjectTypeToString(object.Type()),
+			)
+		}
+
+		switch object.(type) {
+		case *evaluating.ObjectInteger:
+			if object.(*evaluating.ObjectInteger).Value != int64(expectation.output.(int)) {
+				t.Fatalf(
+					"Expected %v, got %v.",
+					expectation.output,
+					object.(*evaluating.ObjectInteger).Value,
+				)
+			}
+		case *evaluating.ObjectBoolean:
+			if object.(*evaluating.ObjectBoolean).Value != expectation.output {
+				t.Fatalf(
+					"Expected %v, got %v.",
+					expectation.output,
+					object.(*evaluating.ObjectBoolean).Value,
+				)
+			}
+		case *evaluating.ObjectNull:
+			if expectation.output != nil {
+				t.Fatalf(
+					"Expected %v, got %v.",
+					expectation.output,
+					object.(*evaluating.ObjectNull),
+				)
+			}
+		default:
+			if object.Inspect() != string(expectation.output.(string)) {
+				t.Fatalf(
+					"Expected %v, got %v.",
+					expectation.output,
+					object.Inspect(),
+				)
+			}
+		}
+	}
+}
+
 func TestEvalError(t *testing.T) {
 	expectations := []struct {
 		input        string
