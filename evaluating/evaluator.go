@@ -89,6 +89,17 @@ func objectReturnValue(value Object) Object {
 	return &ObjectReturnValue{Value: value}
 }
 
+func objectErrorWrongNumberOfArguments(
+	expected int,
+	got int,
+) Object {
+	return objectError(
+		"Wrong number of arguments. Expected %d, got %d.",
+		expected,
+		got,
+	)
+}
+
 func evalCompound(
 	environment *Environment,
 	compound *parsing.AstCompound,
@@ -332,6 +343,11 @@ func evalFunctionCall(
 		environment,
 		functionCall.Arguments,
 	)
+	argumentsLen := len(arguments)
+	parametersLen := len(function.(*ObjectFunction).Parameters)
+	if argumentsLen != parametersLen {
+		return objectErrorWrongNumberOfArguments(parametersLen, argumentsLen)
+	}
 	return applyFunction(function.(*ObjectFunction), arguments)
 }
 

@@ -96,6 +96,8 @@ func TestEvalError(t *testing.T) {
 		{"a;", "Identifier not found: \"a\"."},
 		{"let a = 2; let a = 3;", "Identifier already declared in this scope: \"a\"."},
 		{"let a = 2; fn (a) { a; };", "Identifier already declared in this scope: \"a\"."},
+		{"fn (a) { return a; }(2, 3);", "Wrong number of arguments. Expected 1, got 2."},
+		{"fn (a) { return a; }();", "Wrong number of arguments. Expected 1, got 0."},
 	}
 
 	for _, expectation := range expectations {
