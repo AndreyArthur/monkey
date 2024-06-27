@@ -51,6 +51,7 @@ func ObjectTypeToString(objectType ObjectType) string {
 type Object interface {
 	Type() ObjectType
 	Inspect() string
+	ToString() string
 	Truthiness() bool
 }
 
@@ -64,6 +65,9 @@ func (error *ObjectError) Type() ObjectType {
 func (error *ObjectError) Inspect() string {
 	return error.Message
 }
+func (error *ObjectError) ToString() string {
+	return "<error>"
+}
 func (error *ObjectError) Truthiness() bool {
 	return true
 }
@@ -75,6 +79,9 @@ func (null *ObjectNull) Type() ObjectType {
 }
 func (null *ObjectNull) Inspect() string {
 	return "null"
+}
+func (null *ObjectNull) ToString() string {
+	return null.Inspect()
 }
 func (null *ObjectNull) Truthiness() bool {
 	return false
@@ -89,6 +96,9 @@ func (integer *ObjectInteger) Type() ObjectType {
 }
 func (integer *ObjectInteger) Inspect() string {
 	return fmt.Sprintf("%d", integer.Value)
+}
+func (integer *ObjectInteger) ToString() string {
+	return integer.Inspect()
 }
 func (integer *ObjectInteger) Truthiness() bool {
 	if integer.Value == 0 {
@@ -106,6 +116,9 @@ func (boolean *ObjectBoolean) Type() ObjectType {
 }
 func (boolean *ObjectBoolean) Inspect() string {
 	return fmt.Sprintf("%t", boolean.Value)
+}
+func (boolean *ObjectBoolean) ToString() string {
+	return boolean.Inspect()
 }
 func (boolean *ObjectBoolean) Truthiness() bool {
 	return boolean.Value
@@ -134,6 +147,9 @@ func (function *ObjectFunction) Inspect() string {
 
 	return text
 }
+func (function *ObjectFunction) ToString() string {
+	return "<fn>"
+}
 func (function *ObjectFunction) Truthiness() bool {
 	return true
 }
@@ -156,6 +172,9 @@ func (array *ObjectArray) Inspect() string {
 	text += "]"
 	return text
 }
+func (array *ObjectArray) ToString() string {
+	return array.Inspect()
+}
 func (array *ObjectArray) Truthiness() bool {
 	return true
 }
@@ -169,6 +188,9 @@ func (string *ObjectString) Type() ObjectType {
 }
 func (string *ObjectString) Inspect() string {
 	return fmt.Sprintf("%q", string.Value)
+}
+func (string *ObjectString) ToString() string {
+	return string.Value
 }
 func (string *ObjectString) Truthiness() bool {
 	if string.Value == "" {
@@ -195,6 +217,9 @@ func (hash *ObjectHash) Inspect() string {
 	}
 	text += "}"
 	return text
+}
+func (hash *ObjectHash) ToString() string {
+	return hash.Inspect()
 }
 func (hash *ObjectHash) Truthiness() bool {
 	return true
@@ -234,6 +259,9 @@ func (returnValue *ObjectReturnValue) Type() ObjectType {
 func (returnValue *ObjectReturnValue) Inspect() string {
 	return "return " + returnValue.Value.Inspect()
 }
+func (returnValue *ObjectReturnValue) ToString() string {
+	return returnValue.Inspect()
+}
 func (returnValue *ObjectReturnValue) Truthiness() bool {
 	return returnValue.Value.Truthiness()
 }
@@ -249,6 +277,9 @@ func (builtin *ObjectBuiltin) Type() ObjectType {
 }
 func (builtin *ObjectBuiltin) Inspect() string {
 	return "fn (...)"
+}
+func (builtin *ObjectBuiltin) ToString() string {
+	return "<fn>"
 }
 func (builtin *ObjectBuiltin) Truthiness() bool {
 	return true
