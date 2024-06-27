@@ -22,16 +22,22 @@ type ObjectType int
 
 func ObjectTypeToString(objectType ObjectType) string {
 	switch objectType {
+	case OBJECT_ERROR:
+		return "error"
 	case OBJECT_INTEGER:
 		return "integer"
 	case OBJECT_BOOLEAN:
 		return "boolean"
-	case OBJECT_ERROR:
-		return "error"
-	case OBJECT_FUNCTION:
-		return "function"
+	case OBJECT_NULL:
+		return "null"
 	case OBJECT_ARRAY:
 		return "array"
+	case OBJECT_FUNCTION:
+		return "function"
+	case OBJECT_HASH:
+		return "hash"
+	case OBJECT_STRING:
+		return "string"
 	case OBJECT_RETURN_VALUE:
 		return "return value"
 	default:

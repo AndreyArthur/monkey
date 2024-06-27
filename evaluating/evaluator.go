@@ -63,6 +63,10 @@ func objectErrorIdentifierNotFound(name string) Object {
 	return objectError("Identifier not found: %q.", name)
 }
 
+func objectErrorIdentifierAlreadyDeclared(name string) Object {
+	return objectError("Identifier already declared in this scope: %q.", name)
+}
+
 func objectErrorNotCallable(expression parsing.AstExpression) Object {
 	return objectError("Expression %q is not a callable.", expression.String())
 }
@@ -224,6 +228,10 @@ func evalLetStatement(
 	environment *Environment,
 	letStatement *parsing.AstLetStatement,
 ) Object {
+	if environment.Get(letStatement.Identifier.Name) != nil {
+		return objectErrorIdentifierAlreadyDeclared(letStatement.Identifier.Name)
+	}
+
 	var value Object
 	if letStatement.Value == nil {
 		value = &ObjectNull{}
@@ -262,6 +270,12 @@ func evalFunctionDefinition(
 	environment *Environment,
 	functionDefinition *parsing.AstFunctionDefinition,
 ) Object {
+	for _, parameter := range functionDefinition.Parameters {
+		if environment.Get(parameter.Name) != nil {
+			return objectErrorIdentifierAlreadyDeclared(parameter.Name)
+		}
+	}
+
 	return &ObjectFunction{
 		Parameters:  functionDefinition.Parameters,
 		Body:        functionDefinition.Body,

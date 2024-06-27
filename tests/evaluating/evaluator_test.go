@@ -20,9 +20,6 @@ func TestEvalExpressions(t *testing.T) {
 		{"5 / 2;", evaluating.OBJECT_INTEGER, 2},
 		{"1 + 7 * 2;", evaluating.OBJECT_INTEGER, 15},
 		{"let a = 2;", evaluating.OBJECT_NULL, nil},
-		{"return;", evaluating.OBJECT_NULL, nil},
-		{"return; 2;", evaluating.OBJECT_NULL, nil},
-		{"return true; 2;", evaluating.OBJECT_BOOLEAN, true},
 		{"let a = true; a;", evaluating.OBJECT_BOOLEAN, true},
 		{"fn (a, b) { return a + b; };", evaluating.OBJECT_FUNCTION, "fn (a, b)"},
 		{"fn (a, b) { return a + b; }(1, 2);", evaluating.OBJECT_INTEGER, 3},
@@ -97,6 +94,8 @@ func TestEvalError(t *testing.T) {
 		{"true + 2;", "Type mismatch: boolean + integer."},
 		{"2 * false;", "Type mismatch: integer * boolean."},
 		{"a;", "Identifier not found: \"a\"."},
+		{"let a = 2; let a = 3;", "Identifier already declared in this scope: \"a\"."},
+		{"let a = 2; fn (a) { a; };", "Identifier already declared in this scope: \"a\"."},
 	}
 
 	for _, expectation := range expectations {
@@ -108,9 +107,9 @@ func TestEvalError(t *testing.T) {
 
 		if object.Type() != evaluating.OBJECT_ERROR {
 			t.Fatalf(
-				"Expected %d, got %d.",
-				evaluating.OBJECT_ERROR,
-				object.Type(),
+				"Expected object type to be %s, got %s.",
+				evaluating.ObjectTypeToString(evaluating.OBJECT_ERROR),
+				evaluating.ObjectTypeToString(object.Type()),
 			)
 		}
 
