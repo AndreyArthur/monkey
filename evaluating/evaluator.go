@@ -133,7 +133,7 @@ func InjectBuiltinFunctions(environment *Environment) {
 			}
 
 			fmt.Println(strings.Join(strs, " "))
-			return &ObjectNull{}
+			return NULL
 		},
 	})
 }
@@ -282,7 +282,7 @@ func evalLetStatement(
 
 	var value Object
 	if letStatement.Value == nil {
-		value = &ObjectNull{}
+		value = NULL
 	} else {
 		value = Eval(environment, letStatement.Value)
 	}
@@ -290,7 +290,7 @@ func evalLetStatement(
 		letStatement.Identifier.Name,
 		value,
 	)
-	return &ObjectNull{}
+	return NULL
 }
 
 func evalReturnStatement(
@@ -298,7 +298,7 @@ func evalReturnStatement(
 	returnStatement *parsing.AstReturnStatement,
 ) Object {
 	if returnStatement.Value == nil {
-		return objectReturnValue(&ObjectNull{})
+		return objectReturnValue(NULL)
 	}
 	return objectReturnValue(Eval(environment, returnStatement.Value))
 }
@@ -426,7 +426,7 @@ func evalHashLiteral(
 func evalArrayIndex(array *ObjectArray, indexObject Object) Object {
 	index := indexObject.(*ObjectInteger).Value
 	if index < 0 || index >= int64(len(array.Items)) {
-		return &ObjectNull{}
+		return NULL
 	}
 	return array.Items[index]
 }
@@ -466,7 +466,7 @@ func evalIfElse(
 		return Eval(environment, ifElse.Then)
 	}
 	if ifElse.Else == nil {
-		return &ObjectNull{}
+		return NULL
 	}
 	return Eval(environment, ifElse.Else)
 }

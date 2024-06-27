@@ -87,6 +87,8 @@ func (null *ObjectNull) Truthiness() bool {
 	return false
 }
 
+var NULL = &ObjectNull{}
+
 type ObjectInteger struct {
 	Value int64
 }
@@ -246,7 +248,7 @@ func (hash *ObjectHash) Get(key Object) Object {
 			continue
 		}
 	}
-	return &ObjectNull{}
+	return NULL
 }
 
 type ObjectReturnValue struct {
