@@ -15,6 +15,7 @@ const (
 	OBJECT_FUNCTION
 	OBJECT_HASH
 	OBJECT_STRING
+	OBJECT_RETURN_VALUE
 )
 
 type ObjectType int
@@ -31,6 +32,8 @@ func ObjectTypeToString(objectType ObjectType) string {
 		return "function"
 	case OBJECT_ARRAY:
 		return "array"
+	case OBJECT_RETURN_VALUE:
+		return "return value"
 	default:
 		return "unknown"
 	}
@@ -210,4 +213,18 @@ func (hash *ObjectHash) Get(key Object) Object {
 		}
 	}
 	return &ObjectNull{}
+}
+
+type ObjectReturnValue struct {
+	Value Object
+}
+
+func (returnValue *ObjectReturnValue) Type() ObjectType {
+	return OBJECT_RETURN_VALUE
+}
+func (returnValue *ObjectReturnValue) Inspect() string {
+	return "return " + returnValue.Value.Inspect()
+}
+func (returnValue *ObjectReturnValue) Truthiness() bool {
+	return returnValue.Value.Truthiness()
 }

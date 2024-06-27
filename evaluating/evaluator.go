@@ -81,6 +81,10 @@ func objectErrornotIndexable(expression parsing.AstExpression) Object {
 	return objectError("Expression %q is not a indexable.", expression.String())
 }
 
+func objectReturnValue(value Object) Object {
+	return &ObjectReturnValue{Value: value}
+}
+
 func evalCompound(
 	environment *Environment,
 	compound *parsing.AstCompound,
@@ -88,7 +92,7 @@ func evalCompound(
 	var last Object
 	for _, statement := range compound.Statements {
 		last = Eval(environment, statement)
-		if statement.Type() == parsing.AST_RETURN_STATEMENT {
+		if last.Type() == OBJECT_RETURN_VALUE {
 			return last
 		}
 	}
@@ -238,9 +242,9 @@ func evalReturnStatement(
 	returnStatement *parsing.AstReturnStatement,
 ) Object {
 	if returnStatement.Value == nil {
-		return &ObjectNull{}
+		return objectReturnValue(&ObjectNull{})
 	}
-	return Eval(environment, returnStatement.Value)
+	return objectReturnValue(Eval(environment, returnStatement.Value))
 }
 
 func evalIdentifier(
@@ -296,6 +300,9 @@ func applyFunction(
 		arguments,
 	)
 	evaluated := Eval(extendedEnvironment, function.Body)
+	if evaluated.Type() == OBJECT_RETURN_VALUE {
+		return evaluated.(*ObjectReturnValue).Value
+	}
 	return evaluated
 }
 
