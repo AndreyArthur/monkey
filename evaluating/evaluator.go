@@ -3,6 +3,7 @@ package evaluating
 import (
 	"fmt"
 	"monkey/parsing"
+	"strings"
 )
 
 func objectError(format string, arguments ...interface{}) Object {
@@ -123,8 +124,19 @@ func InjectBuiltinFunctions(environment *Environment) {
 			}
 		},
 	})
-}
 
+	environment.Set("puts", &ObjectBuiltin{
+		Function: func(arguments ...Object) Object {
+			strs := []string{}
+			for _, argument := range arguments {
+				strs = append(strs, argument.ToString())
+			}
+
+			fmt.Println(strings.Join(strs, " "))
+			return &ObjectNull{}
+		},
+	})
+}
 func evalCompound(
 	environment *Environment,
 	compound *parsing.AstCompound,
