@@ -141,9 +141,11 @@ func evalCompound(
 	environment *Environment,
 	compound *parsing.AstCompound,
 ) Object {
+	compoundEnvironment := NewEnvironment(environment)
+
 	var last Object
 	for _, statement := range compound.Statements {
-		last = Eval(environment, statement)
+		last = Eval(compoundEnvironment, statement)
 		if last.Type() == OBJECT_RETURN_VALUE || last.Type() == OBJECT_ERROR {
 			return last
 		}

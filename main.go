@@ -51,11 +51,13 @@ func repl() {
 			continue
 		}
 
-		content += current
-
 		env := evaluating.NewEnvironment(nil)
 		evaluating.InjectBuiltinFunctions(env)
 		object := evaluating.Eval(env, ast)
+
+		if object.Type() != evaluating.OBJECT_ERROR {
+			content += current
+		}
 
 		fmt.Println(object.Inspect())
 	}
