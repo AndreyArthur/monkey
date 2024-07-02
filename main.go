@@ -83,7 +83,11 @@ func file() {
 
 	env := evaluating.NewEnvironment(nil)
 	evaluating.InjectBuiltinFunctions(env)
-	_ = evaluating.Eval(env, ast)
+	object := evaluating.Eval(env, ast)
+
+	if object.Type() == evaluating.OBJECT_ERROR {
+		fmt.Println(object.Inspect())
+	}
 }
 
 func main() {

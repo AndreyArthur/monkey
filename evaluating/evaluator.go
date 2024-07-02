@@ -144,7 +144,7 @@ func evalCompound(
 	var last Object
 	for _, statement := range compound.Statements {
 		last = Eval(environment, statement)
-		if last.Type() == OBJECT_RETURN_VALUE {
+		if last.Type() == OBJECT_RETURN_VALUE || last.Type() == OBJECT_ERROR {
 			return last
 		}
 	}
