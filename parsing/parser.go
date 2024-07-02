@@ -17,6 +17,7 @@ const (
 	PRECEDENCE_PREFIX
 	PRECEDENCE_INDEX
 	PRECEDENCE_CALL
+	PRECEDENCE_ASSIGNMENT
 )
 
 func getPrecedence(tokenType lexing.TokenType) int {
@@ -33,6 +34,7 @@ func getPrecedence(tokenType lexing.TokenType) int {
 		lexing.TOKEN_SLASH:             PRECEDENCE_PRODUCT,
 		lexing.TOKEN_OPEN_BRACKET:      PRECEDENCE_INDEX,
 		lexing.TOKEN_OPEN_PAREN:        PRECEDENCE_CALL,
+		lexing.TOKEN_ASSIGN:            PRECEDENCE_ASSIGNMENT,
 	}
 	return tokenTypeToPrecedence[tokenType]
 }
@@ -397,6 +399,18 @@ func (parser *Parser) parseIfElse() *AstIfElse {
 	return ifElse
 }
 
+func (parser *Parser) parseAssignment(left AstExpression) *AstAssignment {
+	assignment := &AstAssignment{
+		Token: parser.current,
+		Left:  left,
+	}
+	parser.advance()
+	assignment.Value = parser.parseExpression(PRECEDENCE_LOWEST)
+
+	parser.commitError()
+	return assignment
+}
+
 func (parser *Parser) parseExpression(precedence int) AstExpression {
 	var left AstExpression
 
@@ -429,6 +443,8 @@ func (parser *Parser) parseExpression(precedence int) AstExpression {
 			left = parser.parseFunctionCall(left)
 		case lexing.TOKEN_OPEN_BRACKET:
 			left = parser.parseIndex(left)
+		case lexing.TOKEN_ASSIGN:
+			left = parser.parseAssignment(left)
 		default:
 			left = parser.parseInfixExpression(left)
 		}

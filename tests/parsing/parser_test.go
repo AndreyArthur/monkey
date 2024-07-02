@@ -33,6 +33,9 @@ func TestParseExpressionStatement(t *testing.T) {
 		{"fn () {};", "fn () {  };"},
 		{"if (true) { 2 + 2; };", "if (true) { (2 + 2); };"},
 		{"if (true) { 2 + 2; } else { false; };", "if (true) { (2 + 2); } else { false; };"},
+		{"a = 2 + 2;", "a = (2 + 2);"},
+		{"array[2] = 4;", "array[2] = 4;"},
+		{"[1, 2, 3][2] = 24;", "[1, 2, 3][2] = 24;"},
 	}
 
 	for _, expectation := range expectations {

@@ -23,6 +23,7 @@ const (
 	AST_HASH_LITERAL
 	AST_INDEX
 	AST_IF_ELSE
+	AST_ASSIGNMENT
 )
 
 type AstType int
@@ -390,4 +391,21 @@ func (ifElse *AstIfElse) String() string {
 		text += " else { " + ifElse.Else.String() + " }"
 	}
 	return text
+}
+
+type AstAssignment struct {
+	Token *lexing.Token
+	Left  AstExpression
+	Value AstExpression
+}
+
+func (assignment *AstAssignment) expression() {}
+func (assignment *AstAssignment) Type() AstType {
+	return AST_ASSIGNMENT
+}
+func (assignment *AstAssignment) TokenLiteral() string {
+	return assignment.Token.Literal
+}
+func (assignment *AstAssignment) String() string {
+	return assignment.Left.String() + " = " + assignment.Value.String()
 }
