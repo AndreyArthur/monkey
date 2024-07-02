@@ -30,6 +30,8 @@ func TestEvalExpressions(t *testing.T) {
 		{"{4 - 2: false, !0: true, \"hello\": \"world\"}[\"hello\"]", evaluating.OBJECT_STRING, "\"world\""},
 		{"if (1 > 0) { true; } else { false; };", evaluating.OBJECT_BOOLEAN, true},
 		{"if (1 < 0) { true; } else { false; };", evaluating.OBJECT_BOOLEAN, false},
+		{"let a; a = 10;", evaluating.OBJECT_INTEGER, 10},
+		{"let b = true; b = 80; b;", evaluating.OBJECT_INTEGER, 80},
 	}
 
 	for _, expectation := range expectations {

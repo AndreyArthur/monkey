@@ -226,7 +226,7 @@ func (hash *ObjectHash) ToString() string {
 func (hash *ObjectHash) Truthiness() bool {
 	return true
 }
-func (hash *ObjectHash) Get(key Object) Object {
+func (hash *ObjectHash) Get(key Object) (Object, int) {
 	for index, hashKey := range hash.Keys {
 		if hashKey.Type() != key.Type() {
 			continue
@@ -234,21 +234,31 @@ func (hash *ObjectHash) Get(key Object) Object {
 		switch key.Type() {
 		case OBJECT_STRING:
 			if hashKey.(*ObjectString).Value == key.(*ObjectString).Value {
-				return hash.Values[index]
+				return hash.Values[index], index
 			}
 		case OBJECT_INTEGER:
 			if hashKey.(*ObjectInteger).Value == key.(*ObjectInteger).Value {
-				return hash.Values[index]
+				return hash.Values[index], index
 			}
 		case OBJECT_BOOLEAN:
 			if hashKey.(*ObjectBoolean).Value == key.(*ObjectBoolean).Value {
-				return hash.Values[index]
+				return hash.Values[index], index
 			}
 		default:
 			continue
 		}
 	}
-	return NULL
+	return NULL, -1
+}
+func (hash *ObjectHash) Set(key Object, value Object) {
+	_, index := hash.Get(key)
+
+	if index == -1 {
+		hash.Keys = append(hash.Keys, key)
+		hash.Values = append(hash.Values, value)
+	} else {
+		hash.Values[index] = value
+	}
 }
 
 type ObjectReturnValue struct {

@@ -82,7 +82,7 @@ func objectErrorUnsupportedIndex(indexType ObjectType) Object {
 	)
 }
 
-func objectErrornotIndexable(expression parsing.AstExpression) Object {
+func objectErrorNotIndexable(expression parsing.AstExpression) Object {
 	return objectError("Expression %q is not a indexable.", expression.String())
 }
 
@@ -99,6 +99,10 @@ func objectErrorWrongNumberOfArguments(
 		expected,
 		got,
 	)
+}
+
+func objectErrorNotAssignable(expression parsing.AstExpression) Object {
+	return objectError("Expression %q is not assignable.", expression.String())
 }
 
 func InjectBuiltinFunctions(environment *Environment) {
@@ -434,7 +438,8 @@ func evalArrayIndex(array *ObjectArray, indexObject Object) Object {
 }
 
 func evalHashIndex(hash *ObjectHash, key Object) Object {
-	return hash.Get(key)
+	object, _ := hash.Get(key)
+	return object
 }
 
 func evalIndex(
@@ -455,7 +460,7 @@ func evalIndex(
 	case OBJECT_HASH:
 		return evalHashIndex(left.(*ObjectHash), key)
 	default:
-		return objectErrornotIndexable(index.Left)
+		return objectErrorNotIndexable(index.Left)
 	}
 }
 
@@ -471,6 +476,59 @@ func evalIfElse(
 		return NULL
 	}
 	return Eval(environment, ifElse.Else)
+}
+
+func evalAssignment(
+	environment *Environment,
+	assignment *parsing.AstAssignment,
+) Object {
+	if assignment.Left.Type() == parsing.AST_INDEX {
+		index := assignment.Left.(*parsing.AstIndex)
+
+		if index.Left.Type() != parsing.AST_IDENTIFIER {
+			return objectErrorNotIndexable(index.Left)
+		}
+
+		identifier := index.Left.(*parsing.AstIdentifier).Name
+
+		arrayOrHash := environment.Get(identifier)
+
+		if arrayOrHash == nil {
+			return objectErrorIdentifierNotFound(identifier)
+		}
+
+		indexObject := Eval(environment, index.Index)
+		value := Eval(environment, assignment.Value)
+
+		if arrayOrHash.Type() == OBJECT_HASH {
+			hash := arrayOrHash.(*ObjectHash)
+			hash.Set(indexObject, value)
+			return value
+		}
+
+		if arrayOrHash.Type() == OBJECT_ARRAY {
+			array := arrayOrHash.(*ObjectArray)
+			array.Items[indexObject.(*ObjectInteger).Value] = value
+			return value
+		}
+
+		return NULL
+	}
+
+	if assignment.Left.Type() == parsing.AST_IDENTIFIER {
+		identifier := assignment.Left.(*parsing.AstIdentifier).Name
+
+		if environment.Get(identifier) == nil {
+			return objectErrorIdentifierNotFound(identifier)
+		}
+
+		value := Eval(environment, assignment.Value)
+		environment.Set(identifier, value)
+
+		return value
+	}
+
+	return objectErrorNotIndexable(assignment.Left)
 }
 
 func Eval(environment *Environment, ast parsing.AstNode) Object {
@@ -548,6 +606,11 @@ func Eval(environment *Environment, ast parsing.AstNode) Object {
 		return evalIfElse(
 			environment,
 			ast.(*parsing.AstIfElse),
+		)
+	case parsing.AST_ASSIGNMENT:
+		return evalAssignment(
+			environment,
+			ast.(*parsing.AstAssignment),
 		)
 	default:
 		// the switch will be exaustive so this should never happen

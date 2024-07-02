@@ -24,5 +24,16 @@ func (environment *Environment) Get(name string) Object {
 }
 
 func (environment *Environment) Set(name string, value Object) {
-	environment.Store[name] = value
+	if environment.Get(name) == nil {
+		environment.Store[name] = value
+	}
+
+	currentEnvironment := environment
+	_, ok := currentEnvironment.Store[name]
+	for !ok {
+		currentEnvironment = currentEnvironment.Parent
+		_, ok = currentEnvironment.Store[name]
+	}
+
+	currentEnvironment.Store[name] = value
 }
